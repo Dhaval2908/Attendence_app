@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Colors } from "../../theme/colors";
 import {
   View,
   Text,
@@ -12,6 +13,7 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import axios from "axios";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Config from "react-native-config";
+import { fontSizeContent, fontSizeLarge, fontSizeMedium, fontSizeSmall, headerHeight, headerPadding, headerWidth, smartScale } from "../../theme/constants/normalize";
 
 // Define the navigation parameter types
 type RootStackParamList = {
@@ -35,8 +37,6 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     }
 
     try {
-      
-
       const response = await axios.post(`${Config.BASE_URL}/api/auth/login`, {
         email,
         password,
@@ -45,7 +45,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       console.log("Response Data:", response.data);
 
       if (response.status === 200) {
-        Alert.alert("Success", "Logged in successfully!");
+        // Alert.alert("Success", "Logged in successfully!");
         navigation.navigate("Home"); // Navigate to Home screen
       } else {
         Alert.alert("Error", "Invalid credentials.");
@@ -97,8 +97,8 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         >
           <Ionicons
             name={isPasswordVisible ? "eye" : "eye-off"}
-            size={24}
-            color="gray"
+            size={smartScale(22)}
+            color={Colors.primaryColor}
           />
         </TouchableOpacity>
       </View>
@@ -119,77 +119,81 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   );
 };
 
+
 export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: Colors.white,
     alignItems: "center",
     justifyContent: "center",
-    padding: 20,
+    padding: smartScale(20),
   },
   logo: {
-    width: 120,
-    height: 120,
-    marginBottom: 20,
+    width: smartScale(120),
+    height: smartScale(120),
+    marginBottom: smartScale(18),
+    borderRadius: smartScale(20)
   },
   input: {
-    width: "90%",
-    height: 50,
-    borderColor: "#007AFF",
+    width: headerWidth,
+    height: headerHeight,
+    borderColor: Colors.primaryColor,
     borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    fontSize: 16,
-    color: "#000",
+    borderRadius: smartScale(15),
+    paddingHorizontal: headerPadding,
+    marginBottom: headerPadding,
+    fontSize: fontSizeMedium,
+    color: Colors.bg,
   },
   passwordContainer: {
     flexDirection: "row",
-    width: "90%",
-    height: 50,
-    borderColor: "#007AFF",
+    width: headerWidth,
+    height: headerHeight,
+    borderColor: Colors.primaryColor,
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: smartScale(15),
     alignItems: "center",
-    paddingHorizontal: 15,
-    marginBottom: 15,
+    paddingHorizontal: headerPadding,
+    marginBottom: smartScale(18),
   },
   passwordInput: {
     flex: 1,
-    fontSize: 16,
-    color: "#000",
+    fontSize: fontSizeMedium,
+    color: Colors.bg,
   },
   button: {
-    width: "90%",
-    height: 50,
-    backgroundColor: "#28A745",
+    width: headerWidth,
+    height: headerHeight,
+    backgroundColor: Colors.secondaryColor,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 10,
-    marginBottom: 15,
+    borderRadius: smartScale(30),
+    marginBottom: smartScale(12),
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+    color: Colors.bg,
+    fontSize: fontSizeMedium,
   },
   forgotPassword: {
-    color: "#007AFF",
-    fontSize: 14,
-    marginBottom: 10,
+    color: Colors.primaryColor,
+    fontSize: fontSizeSmall,
+    marginBottom: smartScale(2),
+    marginLeft: smartScale(20),
+    alignSelf: "flex-start",
   },
   signupContainer: {
     flexDirection: "row",
+    marginLeft: smartScale(20),
+    alignSelf: "flex-start",
   },
   text: {
-    fontSize: 14,
-    color: "#000",
+    fontSize: fontSizeSmall,
+    color: Colors.bg,
   },
   signupText: {
-    fontSize: 14,
-    color: "#007AFF",
-    fontWeight: "bold",
+    fontSize: fontSizeSmall,
+    color: Colors.primaryColor,
   },
 });

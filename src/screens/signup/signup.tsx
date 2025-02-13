@@ -12,6 +12,8 @@ import {
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { StackScreenProps } from "@react-navigation/stack";
 import Config from "react-native-config";
+import { Colors } from "../../theme/colors";
+import { fontSizeMedium, fontSizeSmall, headerHeight, headerPadding, headerWidth, smartScale } from "../../theme/constants/normalize";
 
 type RootStackParamList = {
   Login: undefined;
@@ -145,7 +147,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
           onChangeText={setPassword}
         />
         <TouchableOpacity onPress={() => setIsPasswordVisible1(!isPasswordVisible1)}>
-          <Ionicons name={isPasswordVisible1 ? "eye" : "eye-off"} size={24} color="gray" />
+          <Ionicons name={isPasswordVisible1 ? "eye" : "eye-off"} size={smartScale(22)} color={Colors.primaryColor} />
         </TouchableOpacity>
       </View>
 
@@ -160,7 +162,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
           onChangeText={setConfirmPassword}
         />
         <TouchableOpacity onPress={() => setIsPasswordVisible2(!isPasswordVisible2)}>
-          <Ionicons name={isPasswordVisible2 ? "eye" : "eye-off"} size={24} color="gray" />
+          <Ionicons name={isPasswordVisible2 ? "eye" : "eye-off"} size={smartScale(22)} color={Colors.primaryColor} />
         </TouchableOpacity>
       </View>
 
@@ -190,92 +192,94 @@ export default SignUpScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: Colors.white,
     alignItems: "center",
     justifyContent: "center",
-    padding: 20,
+    padding: smartScale(20),
   },
   logo: {
-    width: 120,
-    height: 120,
-    marginBottom: 20,
+    width: smartScale(120),
+    height: smartScale(120),
+    marginBottom: smartScale(18),
+    borderRadius: smartScale(20)
   },
   roleContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: 15,
+    marginBottom: headerPadding,
   },
   roleButton: {
     flex: 1,
     borderWidth: 1,
     borderColor: "#007AFF",
-    borderRadius: 10,
-    paddingVertical: 10,
+    borderRadius: smartScale(20),
+    paddingVertical: headerPadding,
     alignItems: "center",
-    marginHorizontal: 5,
+    marginHorizontal: smartScale(5),
   },
   roleButtonSelected: {
-    backgroundColor: "#007AFF",
+    backgroundColor: Colors.primaryColor,
   },
   roleText: {
-    color: "#007AFF",
-    fontSize: 16,
+    color: Colors.primaryColor,
+    fontSize: fontSizeMedium,
   },
   roleTextSelected: {
-    color: "#fff",
-    fontSize: 16,
+    color: Colors.white,
+    fontSize: fontSizeMedium,
   },
   input: {
-    width: "90%",
-    height: 50,
-    borderColor: "#007AFF",
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    fontSize: 16,
-    color: "#000",
-  },
+      width: headerWidth,
+      height: headerHeight,
+      borderColor: Colors.primaryColor,
+      borderWidth: 1,
+      borderRadius: smartScale(15),
+      paddingHorizontal: headerPadding,
+      marginBottom: headerPadding,
+      fontSize: fontSizeMedium,
+      color: Colors.bg,
+    },
   passwordContainer: {
     flexDirection: "row",
-    width: "90%",
-    height: 50,
-    borderColor: "#007AFF",
+    width: headerWidth,
+    height: headerHeight,
+    borderColor: Colors.primaryColor,
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: smartScale(15),
     alignItems: "center",
-    paddingHorizontal: 15,
-    marginBottom: 15,
+    paddingHorizontal: headerPadding,
+    marginBottom: smartScale(12),
   },
   passwordInput: {
     flex: 1,
-    fontSize: 16,
-    color: "#000",
+    fontSize: fontSizeMedium,
+    color: Colors.bg,
   },
   button: {
-    width: "90%",
-    height: 50,
-    backgroundColor: "#28A745",
+    width: headerWidth,
+    height: headerHeight,
+    backgroundColor: Colors.secondaryColor,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 10,
-    marginBottom: 15,
+    borderRadius: smartScale(30),
+    marginBottom: smartScale(12),
+    marginTop: smartScale(6),
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+    color: Colors.bg,
+    fontSize: fontSizeMedium,
   },
   loginContainer: {
     flexDirection: "row",
   },
   text: {
-    fontSize: 14,
-    color: "#000",
+    fontSize: fontSizeSmall,
+    color: Colors.bg,
+    
   },
   loginText: {
-    fontSize: 14,
-    color: "#007AFF",
-    fontWeight: "bold",
+    fontSize: fontSizeSmall,
+    color: Colors.primaryColor,
+    
   },
 });

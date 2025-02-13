@@ -10,17 +10,7 @@ const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Welcome to Home Screen</Text>
-
-      <Text style={styles.text}>Student ID: {studentId || "N/A"}</Text>
-      <Text style={styles.text}>Email: {email || "N/A"}</Text>
-
-      <TouchableOpacity 
-        style={styles.button} 
-        onPress={() => navigation.navigate("Login")} // Navigate to Login
-      >
-        <Text style={styles.buttonText}>Logout</Text>
-      </TouchableOpacity>
+      
     </View>
   );
 };

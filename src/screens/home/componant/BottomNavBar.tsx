@@ -11,6 +11,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 // Update the icon import to use community version
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { Colors } from '../../../theme/colors';
+import { fontSizeSmall, smartScale } from '../../../theme/constants/normalize';
+import { StyleSheet, View } from 'react-native';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -19,15 +21,22 @@ const BottomTabNavigator = () => {
   const params = route.params || {};
 
   return (
-    <Tab.Navigator
+    <View style = {styles.screen}>
+      <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors.primaryColor,
         tabBarInactiveTintColor: Colors.bg,
-        tabBarStyle: {
-          borderTopWidth: 2, // Remove top border
-          height: 60, // Set height of tab bar
-          paddingBottom: 10, // Adjust padding
+        tabBarStyle: {  
+          borderTopWidth: 0, // Remove top border
+          height: smartScale(60), // Set height of tab bar
+          margin: smartScale(15),
+          borderRadius: smartScale(15),
+          elevation: 0,
+        },
+        tabBarLabelStyle: {
+          fontSize: fontSizeSmall, 
+          fontWeight: 'bold',
         },
       }}
     >
@@ -36,8 +45,17 @@ const BottomTabNavigator = () => {
         component={HomeScreen}
         initialParams={params}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="home" size={24} color={color} />
+          tabBarIcon: ({ color,size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="Report" 
+        component={ReportScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="clipboard" size={size} color={color} />
           ),
         }}
       />
@@ -46,17 +64,8 @@ const BottomTabNavigator = () => {
         component={ProfileScreen}
         initialParams={params}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="person" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen 
-        name="Report" 
-        component={ReportScreen}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="clipboard" size={24} color={color} />
+          tabBarIcon: ({ color,size }) => (
+            <Ionicons name="person" size={size} color={color} />
           ),
         }}
       />
@@ -64,13 +73,22 @@ const BottomTabNavigator = () => {
         name="More" 
         component={MoreScreen}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="ellipsis-horizontal" size={24} color={color} />
+          tabBarIcon: ({ color, size}) => (
+            <Ionicons name="ellipsis-horizontal" size={size} color={color} />
           ),
         }}
       />
     </Tab.Navigator>
+    </View>
   );
 };
 
 export default BottomTabNavigator;
+
+
+const styles = StyleSheet.create({
+  screen: {
+    flex:1,
+    justifyContent: 'flex-end',
+    backgroundColor: Colors.white_bg
+  },})

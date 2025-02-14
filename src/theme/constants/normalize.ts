@@ -44,7 +44,7 @@ export const headerPadding = Platform.OS === 'ios' ? iPhoneX ? smartScale(10) : 
 
 export const headerHeight = Platform.OS === 'ios' ? iPhoneX ? smartScale(aspectRatio > 2.16 ? 100 : 87) : smartScale(65) : smartScale(50);
 export const headerWidth = smartScale(screenWidth * 0.8);
-export const fontSizeLarge = fontNormalize((deviceType == 'phone') ? 20 : 36);
+export const fontSizeLarge = fontNormalize((deviceType == 'phone') ? 22 : 36);
 export const fontSizeMedium = fontNormalize((deviceType == 'phone') ? 17 : 14);
 export const fontSizeSmall = fontNormalize((deviceType == 'phone') ? 14 : 16);
 export const fontSizeExtraSmall = fontNormalize((deviceType == 'phone') ? 10 : 14);

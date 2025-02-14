@@ -4,7 +4,7 @@ export const Colors = {
     white_70: "rgba(255, 255, 255, 0.7)",
     white_bg: "rgba(240, 236, 236, 0.8)",
     black: '#000000',
-    primaryColor: '#0077cd', 
+    primaryColor: '#054E85', 
     primaryText1: '#FF0094',
     textSelection: '#F5EDF2',
     primaryText2: '#00C1FF',

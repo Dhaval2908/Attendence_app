@@ -27,7 +27,11 @@ console.log(token)
   return (
     <NavigationContainer>
       <Stack.Navigator
+
         initialRouteName={!token ? "Nav" : "Login"}
+
+        initialRouteName="Nav"
+
         screenOptions={{
           headerShown: false,
           animation: "slide_from_right",

@@ -1,51 +1,34 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { StackScreenProps } from "@react-navigation/stack";
-import { RootStackParamList } from "../../App"; // Import navigation type
+// screens/HomeScreen.tsx
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { RouteProp } from '@react-navigation/native';
+import { BottomTabParamList } from '../../navigation/types';
 
-type Props = StackScreenProps<RootStackParamList, "Home">;
+type HomeScreenRouteProp = RouteProp<BottomTabParamList, 'Home'>;
 
-const HomeScreen: React.FC<Props> = ({ route, navigation }) => {
-  const { studentId, email } = route.params || {}; // Ensure params exist
-
+const HomeScreen = ({ route }: { route: HomeScreenRouteProp }) => {
+  const { studentId, email } = route.params || {};
+  
   return (
     <View style={styles.container}>
-      
+      <Text style={styles.title}>Home Screen</Text>
+      {studentId && <Text>Student ID: {studentId}</Text>}
+      {email && <Text>Email: {email}</Text>}
     </View>
   );
 };
 
-export default HomeScreen;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "white",
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
-  heading: {
+  title: {
     fontSize: 24,
-    fontWeight: "bold",
     marginBottom: 20,
   },
-  text: {
-    fontSize: 18,
-    marginBottom: 10,
-    color: "#333",
-  },
-  button: {
-    marginTop: 20,
-    backgroundColor: "#FF3B30",
-    padding: 15,
-    borderRadius: 10,
-    width: "80%",
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
 });
+
+export default HomeScreen;

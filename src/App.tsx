@@ -1,26 +1,27 @@
-import { createStackNavigator } from "@react-navigation/stack";
+// App.tsx
+import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SignUpScreen from "./screens/signup/signup";
-import LoginScreen from "././screens/login/login";
-import HomeScreen from "././screens/home/home";
+import LoginScreen from "./screens/login/login";
+import { RootStackParamList } from "./navigation/types";
+import BottomTabNavigator from "./screens/home/componant/BottomNavBar";
 
-
-// Define the navigation parameter types
-export type RootStackParamList = {
-  Login: undefined;
-  SignUp: undefined;
-  Home: { studentId: string; email: string } | undefined; // Make params optional
-};
-
-const Stack = createStackNavigator<RootStackParamList>();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        initialRouteName="Login"
+        screenOptions={{
+          headerShown: false,
+          animation: "slide_from_right",
+        }}
+      >
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Nav" component={BottomTabNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
   );

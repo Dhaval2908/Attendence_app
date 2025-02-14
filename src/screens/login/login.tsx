@@ -14,20 +14,22 @@ import axios from "axios";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Config from "react-native-config";
 import { fontSizeContent, fontSizeLarge, fontSizeMedium, fontSizeSmall, headerHeight, headerPadding, headerWidth, smartScale } from "../../theme/constants/normalize";
+import { RootStackParamList } from "../../navigation/types";
 
 // Define the navigation parameter types
-type RootStackParamList = {
-  Login: undefined;
-  SignUp: undefined;
-  Home: undefined;
-};
+// type RootStackParamList = {
+//   Login: undefined;
+//   SignUp: undefined;
+//   // Home: undefined;
+//   Nav: undefined;
+// };
 
 // Type for the props of this screen
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("khunt2@uwindsor.ca");
+  const [password, setPassword] = useState("Dhaval@123");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const handleLogin = async () => {
@@ -46,7 +48,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
       if (response.status === 200) {
         // Alert.alert("Success", "Logged in successfully!");
-        navigation.navigate("Home"); // Navigate to Home screen
+        navigation.navigate("Nav"); // Navigate to Home screen
       } else {
         Alert.alert("Error", "Invalid credentials.");
       }
@@ -74,9 +76,11 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        // placeholder="Email"
+        placeholder="khunt2@uwindsor.ca"
         placeholderTextColor="#555"
-        value={email}
+        // value={email}
+        value="khunt2@uwindsor.ca"
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
@@ -85,10 +89,12 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       <View style={styles.passwordContainer}>
         <TextInput
           style={styles.passwordInput}
-          placeholder="Password"
+          // placeholder="Password"
+          placeholder="Dhaval@123"
           placeholderTextColor="#555"
           secureTextEntry={!isPasswordVisible}
-          value={password}
+          // value={password}
+          value="Dhavl@123"
           onChangeText={setPassword}
           autoCapitalize="none"
         />
@@ -104,7 +110,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       </View>
 
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Sign In</Text>
+        <Text style={styles.buttonText}>Log In</Text>
       </TouchableOpacity>
 
       <Text style={styles.forgotPassword}>Forgot Password?</Text>

@@ -6,11 +6,13 @@ import SignUpScreen from "./screens/signup/signup";
 import LoginScreen from "./screens/login/login";
 import { RootStackParamList } from "./navigation/types";
 import BottomTabNavigator from "./screens/home/componant/BottomNavBar";
+import { AuthProvider } from './context/AuthContext';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
+    <AuthProvider>
     <NavigationContainer>
       <Stack.Navigator
         initialRouteName="Login"
@@ -24,5 +26,6 @@ export default function App() {
         <Stack.Screen name="Nav" component={BottomTabNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
+    </AuthProvider>
   );
 }

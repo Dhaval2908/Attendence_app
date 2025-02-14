@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Colors } from "../../theme/colors";
 import {
   View,
@@ -15,6 +15,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Config from "react-native-config";
 import { fontSizeContent, fontSizeLarge, fontSizeMedium, fontSizeSmall, headerHeight, headerPadding, headerWidth, smartScale } from "../../theme/constants/normalize";
 import { RootStackParamList } from "../../navigation/types";
+import { AuthContext } from "../../context/AuthContext";
 
 // Define the navigation parameter types
 // type RootStackParamList = {
@@ -28,6 +29,7 @@ import { RootStackParamList } from "../../navigation/types";
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
+  const { login } = useContext(AuthContext)!;
   const [email, setEmail] = useState("khunt2@uwindsor.ca");
   const [password, setPassword] = useState("Dhaval@123");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -48,6 +50,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
       if (response.status === 200) {
         // Alert.alert("Success", "Logged in successfully!");
+        await login(response.data)
         navigation.navigate("Nav"); // Navigate to Home screen
       } else {
         Alert.alert("Error", "Invalid credentials.");

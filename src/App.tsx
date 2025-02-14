@@ -15,7 +15,7 @@ export default function App() {
     <AuthProvider>
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Login"
+        initialRouteName="Nav"
         screenOptions={{
           headerShown: false,
           animation: "slide_from_right",

@@ -47,7 +47,7 @@ export const headerWidth = smartScale(screenWidth * 0.8);
 export const fontSizeLarge = fontNormalize((deviceType == 'phone') ? 22 : 36);
 export const fontSizeMedium = fontNormalize((deviceType == 'phone') ? 17 : 14);
 export const fontSizeSmall = fontNormalize((deviceType == 'phone') ? 14 : 16);
-export const fontSizeExtraSmall = fontNormalize((deviceType == 'phone') ? 10 : 14);
+export const fontSizeExtraSmall = fontNormalize((deviceType == 'phone') ? 12 : 14);
 export const fontSizeContent = fontNormalize((deviceType == 'phone') ? 12 : 14);
 export const fontSizeSmallContent = fontNormalize((deviceType == 'phone') ? 8 : 10);
 

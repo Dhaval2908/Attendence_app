@@ -1,41 +1,36 @@
-import React from 'react';
-import { View, Text, StyleSheet, Button, FlatList, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';  // For navigation
-import { fontNormalize, fontSizeLarge, fontSizeMedium, smartScale } from '../../theme/constants/normalize';
+import React, { forwardRef } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { RouteProp, useNavigation } from '@react-navigation/native';
+import { BottomTabParamList } from '../../navigation/types';
 import { Colors } from '../../theme/colors';
-import Ionicons from "@react-native-vector-icons/Ionicons";
+import { smartScale } from '../../theme/constants/normalize';
+import Ionicons from "@react-native-vector-icons/ionicons";
+import { Screen } from 'react-native-screens';
 
-interface Event {
-  id: string;
-  name: string;
-  description: string;
+interface HomeScreenProps {
+  route: RouteProp<BottomTabParamList, 'Home'>;
+  onScroll?: (event: any) => void;
 }
 
-const events: Event[] = [
+const events = [
   { id: '1', name: 'Event 1', description: 'This is the first event.' },
   { id: '2', name: 'Event 2', description: 'This is the second event.' },
   { id: '3', name: 'Event 3', description: 'This is the third event.' },
-  { id: '4', name: 'Event 3', description: 'This is the third event.' },
-  // Add more events as needed
+  { id: '4', name: 'Event 4', description: 'This is the fourth event.' },
 ];
 
-const HomeScreen = () => {
+const HomeScreen = forwardRef<FlatList, HomeScreenProps>(({ route, onScroll }, ref) => {
   const navigation = useNavigation();
 
-  const navigateToEventDetails = (eventId: string) => {
-    // Fix the navigation type error by explicitly typing the screen name and parameters
-    // navigation.navigate('EventDetails', { eventId });
-  };
-
-  const renderEventItem = ({ item }: { item: Event }) => (
+  const renderEventItem = ({ item }: { item: typeof events[0] }) => (
     <View style={styles.eventItem}>
+      <Ionicons name="calendar" size={smartScale(50)} color={Colors.bg}/>
       <View style={styles.eventDetails}>
-      {/* <Ionicons name="calendar" /> */}
         <Text style={styles.eventTitle}>{item.name}</Text>
         <Text style={styles.eventDescription}>{item.description}</Text>
       </View>
       <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>Clock In</Text>
+        <Text style={styles.buttonText}>Clock In</Text>
       </TouchableOpacity>
     </View>
   );
@@ -48,14 +43,18 @@ const HomeScreen = () => {
       </View>
       <Text style={styles.header1}>Upcoming Events</Text>
       <FlatList
+        ref={ref}
         data={events}
         renderItem={renderEventItem}
         keyExtractor={(item) => item.id}
         style={styles.eventList}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ paddingBottom: smartScale(100) }} // Add padding for hidden nav
       />
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   screen: {
@@ -64,87 +63,87 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   header: {
-    fontSize: fontSizeLarge,
+    fontSize: 24,
     fontWeight: 'bold',
     alignSelf: 'flex-start',
     marginHorizontal: '8%',
-    marginTop: smartScale(20),
+    marginTop: 20,
   },
   header1: {
-    fontSize: fontSizeLarge,
+    fontSize: 24,
     fontWeight: 'bold',
     alignSelf: 'flex-start',
-    marginHorizontal: smartScale(30),
-    marginTop: smartScale(10),
+    marginHorizontal: 30,
+    marginTop: 10,
   },
   container: {
     width: '90%',
-    height: smartScale(200),
+    height: 200,
     backgroundColor: Colors.white,
-    borderRadius: smartScale(15),
+    borderRadius: 15,
     marginHorizontal: '15%',
-    marginVertical: smartScale(8),
-    padding: smartScale(20),
+    marginVertical: 8,
+    padding: 20,
     alignSelf: 'center',
     shadowColor: Colors.bg,
-    shadowOffset: { width: smartScale(5), height: smartScale(4) },
+    shadowOffset: { width: 5, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: smartScale(4),
+    shadowRadius: 4,
     elevation: 6,
     justifyContent: 'center',
     alignItems: 'center',
   },
   title: {
-    fontSize: fontSizeLarge,
+    fontSize: 20,
     fontWeight: 'bold',
   },
   eventList: {
     width: '90%',
-    paddingTop: smartScale(5),
+    paddingTop: 5,
   },
   eventItem: {
     width: '97%',
-    height: smartScale(80),
+    height: 80,
     backgroundColor: Colors.white,
-    borderRadius: smartScale(10),
+    borderRadius: 10,
     alignSelf: 'center',
     shadowColor: Colors.bg,
-    shadowOffset: { width: smartScale(5), height: smartScale(4) },
+    shadowOffset: { width: 5, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: smartScale(4),
+    shadowRadius: 4,
     elevation: 6,
-    flexDirection: 'row',  // Aligns button and details in a row
-    justifyContent: 'space-between',  //space between details and button
-    marginHorizontal:'10%',
-    alignItems: 'center',  // Center content vertically
-    marginVertical:smartScale(10),
-    paddingHorizontal: '5%'
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: '10%',
+    alignItems: 'center',
+    marginVertical: 10,
+    paddingHorizontal: '5%',
   },
   eventDetails: {
-    flex: 1,  // Take up available space for event name and description
+    flex: 1,
     justifyContent: 'center',
   },
   eventTitle: {
-    fontSize: fontSizeMedium,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   eventDescription: {
-    fontSize: fontSizeMedium,
-    marginBottom: smartScale(10),
+    fontSize: 16,
+    marginBottom: 10,
   },
   button: {
-      width: smartScale(100),
-      height: smartScale(40),
-      backgroundColor: Colors.secondaryColor,
-      justifyContent: "center",
-      alignItems: "center",
-      borderRadius: smartScale(30),
-      marginBottom: smartScale(12),
-    },
-    buttonText: {
-      color: Colors.primaryColor,
-      fontSize: fontSizeMedium,
-    },
+    width: 100,
+    height: 40,
+    backgroundColor: Colors.secondaryColor,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 30,
+    marginBottom: 12,
+  },
+  buttonText: {
+    color: Colors.primaryColor,
+    fontSize: 16,
+  },
 });
 
 export default HomeScreen;

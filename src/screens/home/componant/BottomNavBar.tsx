@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useRoute } from '@react-navigation/native';
 import HomeScreen from '../home';
 import ProfileScreen from '../../profile/profile';
@@ -9,16 +9,22 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { Colors } from '../../../theme/colors';
 import { fontSizeExtraSmall, headerWidth, smartScale } from '../../../theme/constants/normalize';
-import { StyleSheet, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 const BottomTabNavigator = () => {
   const route = useRoute();
   const params = route.params || {};
+  const tabBarAnimation = useRef(new Animated.Value(0)).current;
 
   return (
     <View style={styles.screen}>
+      <Animated.View style={[styles.animatedTab, { 
+        transform: [{ translateY: tabBarAnimation }] 
+      }]}>
+
+      </Animated.View>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
@@ -93,5 +99,11 @@ const styles = StyleSheet.create({
     // shadowOpacity: 0.5,
     shadowRadius: 2,
     elevation: 22,
+  },
+  animatedTab: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });

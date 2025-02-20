@@ -8,7 +8,7 @@ import { BottomTabParamList } from '../../../navigation/types';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { Colors } from '../../../theme/colors';
-import { fontSizeExtraSmall, fontSizeSmall, headerWidth, smartScale } from '../../../theme/constants/normalize';
+import { fontSizeContent, fontSizeExtraSmall, fontSizeSmall, headerWidth, smartScale } from '../../../theme/constants/normalize';
 import { Animated, StyleSheet, View } from 'react-native';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
@@ -31,28 +31,18 @@ const BottomTabNavigator = () => {
         tabBarActiveTintColor: Colors.primaryColor,
         tabBarInactiveTintColor: Colors.bg,
         tabBarStyle: {  
-          borderTopWidth: 0, // Remove top border
+          borderTopWidth: 0.1, // Remove top border
           height: smartScale(60), // Set height of tab bar
           margin: smartScale(1),
           // borderRadius: smartScale(15),
           elevation: 0,
         },
         tabBarLabelStyle: {
-          fontSize: fontSizeSmall, 
-          fontWeight: 'bold',
+          fontSize: fontSizeContent, 
+          fontFamily: 'Poppins'
         },
       }}
     >
-      <Tab.Screen 
-        name="Home" 
-        component={HomeScreen}
-        initialParams={params}
-        options={{
-          tabBarIcon: ({ color,size }) => (
-            <Ionicons name="home" size={size} color={color} />
-          ),
-        }}
-      >
         <Tab.Screen 
           name="Home" 
           component={HomeScreen}

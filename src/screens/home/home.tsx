@@ -1,13 +1,10 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { ScrollView, View, Text, StyleSheet, Button, TouchableOpacity, FlatList } from 'react-native';
-import { fontSizeLarge, fontSizeMedium, smartScale } from '../../theme/constants/normalize';
+import { fontNormalize, fontSizeLarge, fontSizeMedium, fontSizeSmall, smartScale } from '../../theme/constants/normalize';
 import { Colors } from '../../theme/colors';
 import { AuthContext } from '../../context/AuthContext';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import Geolocation from '@react-native-community/geolocation';
-import { BottomTabParamList } from '../../navigation/types';
-import { RouteProp } from '@react-navigation/native';
-
 
 interface Event {
   id: string;
@@ -27,49 +24,26 @@ const HomeScreen = () => {
   const { user, logout } = useContext(AuthContext)!;
   const [address, setAddress] = useState('Fetching location...');
 
-  // useEffect(() => {
-  //   Geolocation.getCurrentPosition(
-  //     async (info) => {
-  //       try {
-  //         const response = await fetch(
+  useEffect(() => {
+    Geolocation.getCurrentPosition(
+      async (info) => {
+        console.log(info);
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${info.coords.latitude}&lon=${info.coords.longitude}`
+          );
+          const data = await response.json();
+          setAddress(data.display_name || 'Address not found');
+        } catch (error) {
+          console.error('Error fetching address:', error);
+          setAddress('Failed to fetch address');
+        }
+      },
+      (error) => setAddress('Location permission denied'),
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    );
+  }, []);
 
-  //           https://nominatim.openstreetmap.org/reverse?format=json&lat=${info.coords.latitude}&lon=${info.coords.longitude}
-
-  //           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${info.coords.latitude}&lon=${info.coords.longitude}`
-
-  //         );
-  //         const data = await response.json();
-  //         setAddress(data.display_name || 'Address not found');
-  //       } catch (error) {
-  //         console.error('Error fetching address:', error);
-  //         setAddress('Failed to fetch address');
-  //       }
-  //     },
-  //     (error) => setAddress('Location permission denied'),
-  //     { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-  //   );
-  // }, []);
-  Geolocation.getCurrentPosition(async(info) =>
-    {console.log(info)
-     console.log(info.coords.latitude)
-     console.log(info.coords.longitude)
-     try {
-       const response = await fetch(
-         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${info.coords.latitude}&lon=${info.coords.longitude}`
-       );
-       const data = await response.json();
-       if (data && data.display_name) {
-         setAddress(data.display_name);
-         
-       } else {
-         setAddress("Address not found");
-       }
-     } catch (error) {
-       console.error("Error fetching address:", error);
-       setAddress("Failed to fetch address");
-     }
-     
-    });
     const renderEventItem = ({ item }: { item: Event }) => (
       <View style={styles.eventItem}>
         <View style={styles.eventDetails}>
@@ -85,25 +59,33 @@ const HomeScreen = () => {
         </TouchableOpacity>
       </View>
     );
-
     return (
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-      <Text style={styles.header}>Your Location</Text>
-      <View style={styles.container}>
-      <Ionicons name="location-outline" size={40} color={Colors.primaryColor} style={{ marginLeft: 15 }} />
-        <Text style={styles.title}>{address}</Text>
-      </View>
-
-      <Text style={styles.header1}>Upcoming Events</Text>
       <FlatList
-        data={events}
-        renderItem={renderEventItem}
-        keyExtractor={(item) => item.id}
-        style={styles.eventList}
-        contentContainerStyle={{ paddingBottom: smartScale(50) }} // Extra padding for smooth scrolling
-        />
+      data={[]}
+      ListHeaderComponent={
+        <>
+          <Text style={styles.header}>Your Location</Text>
+          <View style={styles.container}>
+            <Ionicons name="location-outline" size={smartScale(34)} color={Colors.primaryColor} />
+            <Text style={styles.title}>{address}</Text>
+          </View>
 
-    </ScrollView>
+          <Text style={styles.header1}>Upcoming Events</Text>
+        </>
+      }
+      ListFooterComponent={
+        <FlatList
+          data={events}
+          renderItem={renderEventItem}
+          keyExtractor={(item) => item.id}
+          scrollEnabled={false}
+          contentContainerStyle={styles.eventList}
+        />
+      }
+      renderItem={() => null}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.scrollContainer}
+    />
   );
 };
 export default HomeScreen;
@@ -127,13 +109,13 @@ const styles = StyleSheet.create({
     marginTop: smartScale(5),
   },
   container: {
-    width: smartScale(310),
-    height: smartScale(140),
+    width: '85%',
+    height: smartScale(120),
     backgroundColor: Colors.white,
-    borderRadius: smartScale(15),
+    borderRadius: smartScale(10),
     margin: smartScale(15),
     padding: smartScale(34),
-    // paddingVertical : smartScale(35),
+    paddingVertical : smartScale(35),
     alignSelf: 'center',
     shadowColor: Colors.bg,
     shadowOffset: { width: smartScale(5), height: smartScale(4) },
@@ -146,18 +128,19 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   title: {
-    fontSize: fontSizeMedium,
+    fontSize: fontNormalize(15),
+
   },
   eventList: {
-    width: '90%',
-    paddingTop: 5,
+    width: '85%',
+    paddingTop: smartScale(5),
     margin:'auto'
   },
   eventItem: {
-    width: '97%',
-    height: 80,
+    width: '85%',
+    height: smartScale(80),
     backgroundColor: Colors.white,
-    borderRadius: 10,
+    borderRadius: smartScale(10),
     alignSelf: 'center',
     shadowColor: Colors.bg,
     shadowOffset: { width: 5, height: 4 },
@@ -168,32 +151,32 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginHorizontal: '10%',
     alignItems: 'center',
-    marginVertical: 10,
+    marginVertical: smartScale(8),
     paddingHorizontal: '5%',
   },
   eventDetails: {
     flex: 1,
     justifyContent: 'center',
+    alignSelf: 'center'
   },
   eventTitle: {
-    fontSize: 18,
+    fontSize: fontNormalize(18),
     fontWeight: 'bold',
   },
   eventDescription: {
-    fontSize: 16,
-    marginBottom: 10,
+    fontSize: fontSizeSmall,
+    marginBottom: smartScale(10),
   },
   button: {
-    width: 100,
-    height: 40,
+    width: smartScale(90),
+    height: smartScale(35),
     backgroundColor: Colors.secondaryColor,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 30,
-    marginBottom: 12,
+    borderRadius: smartScale(30),
   },
   buttonText: {
     color: Colors.primaryColor,
-    fontSize: 16,
+    fontSize: fontSizeMedium,
   },
 });

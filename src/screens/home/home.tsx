@@ -8,16 +8,19 @@ import Geolocation from '@react-native-community/geolocation';
 import { BottomTabParamList } from '../../navigation/types';
 import { RouteProp } from '@react-navigation/native';
 
-interface HomeScreenProps {
-  route: RouteProp<BottomTabParamList, 'Home'>;
-  onScroll?: (event: any) => void;
+
+interface Event {
+  id: string;
+  name: string;
+  description: string;
 }
 
-const events = [
+const events: Event[] = [
   { id: '1', name: 'Event 1', description: 'This is the first event.' },
   { id: '2', name: 'Event 2', description: 'This is the second event.' },
   { id: '3', name: 'Event 3', description: 'This is the third event.' },
   { id: '4', name: 'Event 4', description: 'This is the fourth event.' },
+  { id: '5', name: 'Event 5', description: 'This is the fourth event.' },
 ];
 
 const HomeScreen = () => {
@@ -29,7 +32,11 @@ const HomeScreen = () => {
   //     async (info) => {
   //       try {
   //         const response = await fetch(
+
+  //           https://nominatim.openstreetmap.org/reverse?format=json&lat=${info.coords.latitude}&lon=${info.coords.longitude}
+
   //           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${info.coords.latitude}&lon=${info.coords.longitude}`
+
   //         );
   //         const data = await response.json();
   //         setAddress(data.display_name || 'Address not found');
@@ -78,9 +85,9 @@ const HomeScreen = () => {
         </TouchableOpacity>
       </View>
     );
-    
-  return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}showsVerticalScrollIndicator={false}>
+
+    return (
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
       <Text style={styles.header}>Your Location</Text>
       <View style={styles.container}>
       <Ionicons name="location-outline" size={40} color={Colors.primaryColor} style={{ marginLeft: 15 }} />
@@ -89,16 +96,17 @@ const HomeScreen = () => {
 
       <Text style={styles.header1}>Upcoming Events</Text>
       <FlatList
-        ref={ref}
         data={events}
         renderItem={renderEventItem}
         keyExtractor={(item) => item.id}
         style={styles.eventList}
         contentContainerStyle={{ paddingBottom: smartScale(50) }} // Extra padding for smooth scrolling
-      />
+        />
+
     </ScrollView>
   );
-});
+};
+export default HomeScreen;
 
 const styles = StyleSheet.create({
   scrollContainer: {
@@ -107,7 +115,7 @@ const styles = StyleSheet.create({
     paddingBottom: smartScale(30),
   },
   header: {
-    fontSize: 24,
+    fontSize: fontSizeLarge,
     fontWeight: 'bold',
     marginHorizontal: smartScale(30),
     marginTop: smartScale(20),
@@ -128,9 +136,9 @@ const styles = StyleSheet.create({
     // paddingVertical : smartScale(35),
     alignSelf: 'center',
     shadowColor: Colors.bg,
-    shadowOffset: { width: 5, height: 4 },
+    shadowOffset: { width: smartScale(5), height: smartScale(4) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: smartScale(4),
     elevation: 6,
     justifyContent: 'center',
     alignItems: 'center',
@@ -138,21 +146,12 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   title: {
-<<<<<<< HEAD
     fontSize: fontSizeMedium,
-
-=======
-    fontSize: 20,
-    fontWeight: 'bold',
->>>>>>> e72d86a4a99c1dd541bb3075bbc2740cd2ad93e0
   },
   eventList: {
     width: '90%',
     paddingTop: 5,
-<<<<<<< HEAD
     margin:'auto'
-=======
->>>>>>> e72d86a4a99c1dd541bb3075bbc2740cd2ad93e0
   },
   eventItem: {
     width: '97%',
@@ -198,5 +197,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
-export default HomeScreen;

@@ -103,16 +103,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tabBar: {
-    position: 'absolute',
-    bottom: smartScale(20),  // Lift tab bar above the bottom
-    width: '90%',
-    marginHorizontal: "5%",
+
     height: smartScale(65),
     backgroundColor: Colors.white,
-    borderRadius: smartScale(25),  // Rounded edges for floating effect
     shadowColor: Colors.bg,
     shadowOffset: { width: 0, height: 4 },
-    // shadowOpacity: 0.5,
     shadowRadius: 2,
     elevation: 22,
   },

@@ -30,7 +30,9 @@ console.log(token)
 
         initialRouteName={token ? "Nav" : "Login"}
 
-     
+
+        // initialRouteName="Nav"
+
 
         screenOptions={{
           headerShown: false,

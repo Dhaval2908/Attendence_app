@@ -30,8 +30,8 @@ const BottomTabNavigator = () => {
         tabBarStyle: {  
           borderTopWidth: 0, // Remove top border
           height: smartScale(60), // Set height of tab bar
-          margin: smartScale(15),
-          borderRadius: smartScale(15),
+          margin: smartScale(1),
+          // borderRadius: smartScale(15),
           elevation: 0,
         },
         tabBarLabelStyle: {

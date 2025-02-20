@@ -5,6 +5,9 @@ import { Colors } from '../../theme/colors';
 import { AuthContext } from '../../context/AuthContext';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import Geolocation from '@react-native-community/geolocation';
+import { BottomTabParamList } from '../../navigation/types';
+import { RouteProp } from '@react-navigation/native';
+
 
 interface Event {
   id: string;
@@ -29,7 +32,11 @@ const HomeScreen = () => {
   //     async (info) => {
   //       try {
   //         const response = await fetch(
+
   //           https://nominatim.openstreetmap.org/reverse?format=json&lat=${info.coords.latitude}&lon=${info.coords.longitude}
+
+  //           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${info.coords.latitude}&lon=${info.coords.longitude}`
+
   //         );
   //         const data = await response.json();
   //         setAddress(data.display_name || 'Address not found');
@@ -78,6 +85,7 @@ const HomeScreen = () => {
         </TouchableOpacity>
       </View>
     );
+
     return (
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
       <Text style={styles.header}>Your Location</Text>
@@ -94,6 +102,7 @@ const HomeScreen = () => {
         style={styles.eventList}
         contentContainerStyle={{ paddingBottom: smartScale(50) }} // Extra padding for smooth scrolling
         />
+
     </ScrollView>
   );
 };
@@ -138,7 +147,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: fontSizeMedium,
-
   },
   eventList: {
     width: '90%',

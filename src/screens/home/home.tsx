@@ -5,14 +5,15 @@ import { Colors } from '../../theme/colors';
 import { AuthContext } from '../../context/AuthContext';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import Geolocation from '@react-native-community/geolocation';
+import { BottomTabParamList } from '../../navigation/types';
+import { RouteProp } from '@react-navigation/native';
 
-interface Event {
-  id: string;
-  name: string;
-  description: string;
+interface HomeScreenProps {
+  route: RouteProp<BottomTabParamList, 'Home'>;
+  onScroll?: (event: any) => void;
 }
 
-const events: Event[] = [
+const events = [
   { id: '1', name: 'Event 1', description: 'This is the first event.' },
   { id: '2', name: 'Event 2', description: 'This is the second event.' },
   { id: '3', name: 'Event 3', description: 'This is the third event.' },
@@ -88,6 +89,7 @@ const HomeScreen = () => {
 
       <Text style={styles.header1}>Upcoming Events</Text>
       <FlatList
+        ref={ref}
         data={events}
         renderItem={renderEventItem}
         keyExtractor={(item) => item.id}
@@ -96,7 +98,7 @@ const HomeScreen = () => {
       />
     </ScrollView>
   );
-};
+});
 
 const styles = StyleSheet.create({
   scrollContainer: {
@@ -105,7 +107,7 @@ const styles = StyleSheet.create({
     paddingBottom: smartScale(30),
   },
   header: {
-    fontSize: fontSizeLarge,
+    fontSize: 24,
     fontWeight: 'bold',
     marginHorizontal: smartScale(30),
     marginTop: smartScale(20),
@@ -126,9 +128,9 @@ const styles = StyleSheet.create({
     // paddingVertical : smartScale(35),
     alignSelf: 'center',
     shadowColor: Colors.bg,
-    shadowOffset: { width: smartScale(5), height: smartScale(4) },
+    shadowOffset: { width: 5, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: smartScale(4),
+    shadowRadius: 4,
     elevation: 6,
     justifyContent: 'center',
     alignItems: 'center',
@@ -136,13 +138,21 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   title: {
+<<<<<<< HEAD
     fontSize: fontSizeMedium,
 
+=======
+    fontSize: 20,
+    fontWeight: 'bold',
+>>>>>>> e72d86a4a99c1dd541bb3075bbc2740cd2ad93e0
   },
   eventList: {
     width: '90%',
     paddingTop: 5,
+<<<<<<< HEAD
     margin:'auto'
+=======
+>>>>>>> e72d86a4a99c1dd541bb3075bbc2740cd2ad93e0
   },
   eventItem: {
     width: '97%',

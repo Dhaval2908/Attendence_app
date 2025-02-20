@@ -13,7 +13,7 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import axios from "axios";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Config from "react-native-config";
-import { fontSizeContent, fontSizeLarge, fontSizeMedium, fontSizeSmall, headerHeight, headerPadding, headerWidth, smartScale } from "../../theme/constants/normalize";
+import { fontSizeMedium, fontSizeSmall, headerHeight, headerPadding, headerWidth, smartScale } from "../../theme/constants/normalize";
 import { RootStackParamList } from "../../navigation/types";
 import { AuthContext } from "../../context/AuthContext";
 

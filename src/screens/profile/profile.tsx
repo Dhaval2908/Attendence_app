@@ -1,105 +1,138 @@
-import React, { useContext, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { AuthContext, AuthProvider } from "../../context/AuthContext";
-import Ionicons from "@react-native-vector-icons/ionicons";
-import { Colors } from "../../theme/colors";
-import { RootStackParamList } from "../../navigation/types";
-import { NavigationProp, useNavigation } from "@react-navigation/native";
-import Geolocation from '@react-native-community/geolocation';
-const ProfileScreen: React.FC = () => {
-  // const { user, logout } = AuthProvider();
+
+import React, { useContext, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { fontNormalize, fontSizeLarge, smartScale } from '../../theme/constants/normalize';
+import Ionicons from '@react-native-vector-icons/ionicons';
+import { Colors } from '../../theme/colors';
+import Config from "react-native-config";
+import { AuthContext } from '../../context/AuthContext';
+import axios from 'axios';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../../navigation/types';
+
+interface Profile {
+  fullName: string;
+  studentId: string;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  country: string;
+}
+
+const ProfileScreen = () => {
   const { user,logout } = useContext(AuthContext)!;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const [address,setAddress] = useState("")
-
   const handleLogout = async () => {
     await logout(navigation) // Clear context and storage
   };
-  Geolocation.getCurrentPosition(async(info) =>
-     {console.log(info)
-      console.log(info.coords.latitude)
-      console.log(info.coords.longitude)
+  const { token } = useContext(AuthContext)!;
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
       try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${info.coords.latitude}&lon=${info.coords.longitude}`
-        );
-        const data = await response.json();
-        if (data && data.display_name) {
-          setAddress(data.display_name);
-          
-        } else {
-          setAddress("Address not found");
-        }
+        const response = await axios.get(`${Config.BASE_URL}/api/profile/`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        setProfile(response.data);
       } catch (error) {
-        console.error("Error fetching address:", error);
-        setAddress("Failed to fetch address");
+        console.error('Error fetching profile:', error);
+      } finally {
+        setLoading(false);
       }
-      
-     });
-     console.log(address)
-  // if (!user) {
-  //   return (
-  //     <View style={styles.container}>
-  //       <Text style={styles.noUserText}>No user data found.</Text>
-  //     </View>
-  //   );
-  // }
+    };
+
+    fetchProfile();
+  }, [token]);
+
+  if (loading) {
+    return <ActivityIndicator size="large" color={Colors.primaryColor} style={styles.loader} />;
+  }
 
   return (
-    <View style={styles.container}>
-      {/* Dummy Circle for Profile Picture */}
-      <View style={styles.dummyCircle}>
-        <Text style={styles.initials}>
-          {user?.email[0].toUpperCase()}
-        </Text>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <Text style={styles.topHeader}>Profile</Text>
+      <View style={styles.profileHeader}>
+        <Ionicons name="person-circle-outline" size={smartScale(100)} color={Colors.primaryColor} />
+        <Text style={styles.profileName}>{profile?.fullName || 'Guest'}</Text>
       </View>
-      
-      <Text style={styles.name}>{user?.email}</Text>
-      <Text style={styles.role}>{user?.role}</Text>
-      <Text style={styles.role}>{address}</Text>
-
+      <View style={styles.sectionContainer}>
+        <ProfileInfo label="Student ID" value={profile?.studentId || 'N/A'} />
+        <ProfileInfo label="Full Name" value={profile?.fullName || 'Not provided'} />
+        <ProfileInfo label="Email" value={profile?.email || 'No email'} />
+        <ProfileInfo label="Phone Number" value={profile?.phoneNumber || 'Not provided'} />
+        <ProfileInfo label="Country" value={profile?.country || 'Not specified'} />
+      </View>
       <TouchableOpacity style={styles.button} onPress={handleLogout}>
-        <Text style={styles.buttonText}>Logout</Text>
-        <Ionicons name="log-out-outline" size={20} color={Colors.bg} />
-      </TouchableOpacity>
-      
-    </View>
+         <Text style={styles.buttonText}>Logout</Text>
+         <Ionicons name="log-out-outline" size={20} color={Colors.bg} />
+       </TouchableOpacity>
+    </ScrollView>
   );
 };
 
-export default ProfileScreen;
+const ProfileInfo: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+  <View style={styles.infoContainer}>
+    <Text style={styles.infoLabel}>{label}</Text>
+    <Text style={styles.infoValue}>{value}</Text>
+  </View>
+);
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+  scrollContainer: {
+    flexGrow: 1,
     backgroundColor: Colors.white,
-    padding: 20,
+    paddingBottom: smartScale(30),
   },
-  dummyCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: Colors.primaryColor,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  initials: {
-    color: Colors.white,
-    fontSize: 40,
-    fontWeight: "bold",
+  profileHeader: {
+    alignItems: 'center',
+    paddingTop: smartScale(30),
   },
-  name: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: Colors.primaryColor,
-    marginBottom: 8,
+  topHeader: {
+    fontSize: fontSizeLarge,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    marginTop: smartScale(10),
   },
-  role: {
-    fontSize: 18,
-    color: Colors.bg,
-    marginBottom: 20,
+  profileName: {
+    fontSize: fontSizeLarge,
+    fontWeight: 'bold',
+    marginTop: smartScale(10),
+  },
+  sectionContainer: {
+    width: '90%',
+    alignSelf: 'center',
+    marginTop: smartScale(20),
+    padding: smartScale(15),
+    backgroundColor: Colors.white,
+    borderRadius: smartScale(10),
+    shadowColor: Colors.bg,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  infoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: smartScale(8),
+  },
+  infoLabel: {
+    fontSize: fontNormalize(16),
+  },
+  infoValue: {
+    fontSize: fontNormalize(16),
+    fontWeight: '500',
   },
   button: {
     flexDirection: "row",
@@ -120,3 +153,10 @@ const styles = StyleSheet.create({
     color: Colors.bg,
   },
 });
+
+export default ProfileScreen;
+
+function logout(navigation: any) {
+  throw new Error('Function not implemented.');
+}
+

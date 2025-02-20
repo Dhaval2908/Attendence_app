@@ -1,105 +1,149 @@
-import React, { forwardRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { RouteProp, useNavigation } from '@react-navigation/native';
-import { BottomTabParamList } from '../../navigation/types';
+import React, { useContext, useState, useEffect } from 'react';
+import { ScrollView, View, Text, StyleSheet, Button, TouchableOpacity, FlatList } from 'react-native';
+import { fontSizeLarge, fontSizeMedium, smartScale } from '../../theme/constants/normalize';
 import { Colors } from '../../theme/colors';
-import { smartScale } from '../../theme/constants/normalize';
-import Ionicons from "@react-native-vector-icons/ionicons";
-import { Screen } from 'react-native-screens';
+import { AuthContext } from '../../context/AuthContext';
+import Ionicons from '@react-native-vector-icons/ionicons';
+import Geolocation from '@react-native-community/geolocation';
 
-interface HomeScreenProps {
-  route: RouteProp<BottomTabParamList, 'Home'>;
-  onScroll?: (event: any) => void;
+interface Event {
+  id: string;
+  name: string;
+  description: string;
 }
 
-const events = [
+const events: Event[] = [
   { id: '1', name: 'Event 1', description: 'This is the first event.' },
   { id: '2', name: 'Event 2', description: 'This is the second event.' },
   { id: '3', name: 'Event 3', description: 'This is the third event.' },
   { id: '4', name: 'Event 4', description: 'This is the fourth event.' },
+  { id: '5', name: 'Event 5', description: 'This is the fourth event.' },
 ];
 
-const HomeScreen = forwardRef<FlatList, HomeScreenProps>(({ route, onScroll }, ref) => {
-  const navigation = useNavigation();
+const HomeScreen = () => {
+  const { user, logout } = useContext(AuthContext)!;
+  const [address, setAddress] = useState('Fetching location...');
 
-  const renderEventItem = ({ item }: { item: typeof events[0] }) => (
-    <View style={styles.eventItem}>
-      <Ionicons name="calendar" size={smartScale(50)} color={Colors.bg}/>
-      <View style={styles.eventDetails}>
-        <Text style={styles.eventTitle}>{item.name}</Text>
-        <Text style={styles.eventDescription}>{item.description}</Text>
+  // useEffect(() => {
+  //   Geolocation.getCurrentPosition(
+  //     async (info) => {
+  //       try {
+  //         const response = await fetch(
+  //           https://nominatim.openstreetmap.org/reverse?format=json&lat=${info.coords.latitude}&lon=${info.coords.longitude}
+  //         );
+  //         const data = await response.json();
+  //         setAddress(data.display_name || 'Address not found');
+  //       } catch (error) {
+  //         console.error('Error fetching address:', error);
+  //         setAddress('Failed to fetch address');
+  //       }
+  //     },
+  //     (error) => setAddress('Location permission denied'),
+  //     { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+  //   );
+  // }, []);
+  Geolocation.getCurrentPosition(async(info) =>
+    {console.log(info)
+     console.log(info.coords.latitude)
+     console.log(info.coords.longitude)
+     try {
+       const response = await fetch(
+         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${info.coords.latitude}&lon=${info.coords.longitude}`
+       );
+       const data = await response.json();
+       if (data && data.display_name) {
+         setAddress(data.display_name);
+         
+       } else {
+         setAddress("Address not found");
+       }
+     } catch (error) {
+       console.error("Error fetching address:", error);
+       setAddress("Failed to fetch address");
+     }
+     
+    });
+    const renderEventItem = ({ item }: { item: Event }) => (
+      <View style={styles.eventItem}>
+        <View style={styles.eventDetails}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Ionicons name="calendar-outline" size={20} color={Colors.primaryColor} />
+            <Text style={styles.eventTitle}>{item.name}</Text>
+          </View>
+          <Text style={styles.eventDescription}>{item.description}</Text>
+        </View>
+        
+        <TouchableOpacity style={styles.button} onPress={() => console.log(`Navigating to ${item.id}`)}>
+          <Text style={styles.buttonText}>Clock In</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Clock In</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  return (
-    <View style={styles.screen}>
+    );
+    return (
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
       <Text style={styles.header}>Your Location</Text>
       <View style={styles.container}>
-        <Text style={styles.title}>This is a basic container for map!</Text>
+      <Ionicons name="location-outline" size={40} color={Colors.primaryColor} style={{ marginLeft: 15 }} />
+        <Text style={styles.title}>{address}</Text>
       </View>
+
       <Text style={styles.header1}>Upcoming Events</Text>
       <FlatList
-        ref={ref}
         data={events}
         renderItem={renderEventItem}
         keyExtractor={(item) => item.id}
         style={styles.eventList}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        contentContainerStyle={{ paddingBottom: smartScale(100) }} // Add padding for hidden nav
-      />
-    </View>
+        contentContainerStyle={{ paddingBottom: smartScale(50) }} // Extra padding for smooth scrolling
+        />
+    </ScrollView>
   );
-});
+};
+export default HomeScreen;
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    alignItems: 'center',
+  scrollContainer: {
+    flexGrow: 1,
     backgroundColor: Colors.white,
+    paddingBottom: smartScale(30),
   },
   header: {
-    fontSize: 24,
+    fontSize: fontSizeLarge,
     fontWeight: 'bold',
-    alignSelf: 'flex-start',
-    marginHorizontal: '8%',
-    marginTop: 20,
+    marginHorizontal: smartScale(30),
+    marginTop: smartScale(20),
   },
   header1: {
-    fontSize: 24,
+    fontSize: fontSizeLarge,
     fontWeight: 'bold',
-    alignSelf: 'flex-start',
-    marginHorizontal: 30,
-    marginTop: 10,
+    marginHorizontal: smartScale(30),
+    marginTop: smartScale(5),
   },
   container: {
-    width: '90%',
-    height: 200,
+    width: smartScale(310),
+    height: smartScale(140),
     backgroundColor: Colors.white,
-    borderRadius: 15,
-    marginHorizontal: '15%',
-    marginVertical: 8,
-    padding: 20,
+    borderRadius: smartScale(15),
+    margin: smartScale(15),
+    padding: smartScale(34),
+    // paddingVertical : smartScale(35),
     alignSelf: 'center',
     shadowColor: Colors.bg,
-    shadowOffset: { width: 5, height: 4 },
+    shadowOffset: { width: smartScale(5), height: smartScale(4) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: smartScale(4),
     elevation: 6,
     justifyContent: 'center',
     alignItems: 'center',
+    flexDirection : 'row',
+    gap: 10,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: fontSizeMedium,
+
   },
   eventList: {
     width: '90%',
     paddingTop: 5,
+    margin:'auto'
   },
   eventItem: {
     width: '97%',
@@ -145,5 +189,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
-export default HomeScreen;

@@ -47,14 +47,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = async (navigation: NavigationProp<RootStackParamList>) => {
-    setUser(null);
-    setToken(null);
-    await AsyncStorage.removeItem('user');
-    await AsyncStorage.removeItem('token');
-    navigation.reset({
+    try {
+      setUser(null);
+      setToken(null);
+      await AsyncStorage.multiRemove(['user', 'token']);
+      navigation.reset({
         index: 0,
         routes: [{ name: "Login" }],
       });
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw error;
+    }
   };
 
   return (

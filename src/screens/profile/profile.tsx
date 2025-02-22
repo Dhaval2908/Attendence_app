@@ -1,6 +1,13 @@
-
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  ActivityIndicator, 
+  TouchableOpacity,
+  Alert 
+} from 'react-native';
 import { fontNormalize, fontSizeLarge, smartScale } from '../../theme/constants/normalize';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { Colors } from '../../theme/colors';
@@ -20,14 +27,30 @@ interface Profile {
 }
 
 const ProfileScreen = () => {
-  const { user,logout } = useContext(AuthContext)!;
+  const { user, logout, token } = useContext(AuthContext)!;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const handleLogout = async () => {
-    await logout(navigation) // Clear context and storage
-  };
-  const { token } = useContext(AuthContext)!;
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      // Simply clear local authentication state
+      await logout(navigation);
+      
+      // Reset navigation stack
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+    } catch (error) {
+      console.error('Logout failed:', error);
+      Alert.alert('Error', 'Failed to logout. Please try again.');
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -46,7 +69,9 @@ const ProfileScreen = () => {
       }
     };
 
-    fetchProfile();
+    if (token) {
+      fetchProfile();
+    }
   }, [token]);
 
   if (loading) {
@@ -67,10 +92,24 @@ const ProfileScreen = () => {
         <ProfileInfo label="Phone Number" value={profile?.phoneNumber || 'Not provided'} />
         <ProfileInfo label="Country" value={profile?.country || 'Not specified'} />
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleLogout}>
-         <Text style={styles.buttonText}>Logout</Text>
-         <Ionicons name="log-out-outline" size={20} color={Colors.bg} />
-       </TouchableOpacity>
+      <TouchableOpacity 
+        style={styles.button} 
+        onPress={handleLogout}
+        disabled={isLoggingOut}
+      >
+        {isLoggingOut ? (
+          <ActivityIndicator color={Colors.white} />
+        ) : (
+          <>
+            <Text style={styles.buttonText}>Logout</Text>
+            <Ionicons 
+              name="log-out-outline" 
+              size={smartScale(20)} 
+              style={styles.icon} 
+            />
+          </>
+        )}
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -81,6 +120,8 @@ const ProfileInfo: React.FC<{ label: string; value: string }> = ({ label, value 
     <Text style={styles.infoValue}>{value}</Text>
   </View>
 );
+
+// Keep your existing StyleSheet
 
 const styles = StyleSheet.create({
   scrollContainer: {
@@ -136,27 +177,23 @@ const styles = StyleSheet.create({
   },
   button: {
     flexDirection: "row",
-    alignItems: "center",
+    alignSelf: "center",
+    justifyContent: 'center',
     backgroundColor: Colors.secondaryColor,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 30,
-    marginTop: 20,
+    borderRadius: smartScale(20),
+    marginTop: smartScale(20),
+    width: smartScale(110),
+    height: smartScale(50),
   },
   buttonText: {
     color: Colors.bg,
-    fontSize: 16,
-    marginRight: 10,
+    alignSelf:'center',
+    fontSize: fontNormalize(16),
+    marginRight: smartScale(8),
   },
-  noUserText: {
-    fontSize: 20,
-    color: Colors.bg,
+  icon:{
+    alignSelf:'center',
   },
 });
 
 export default ProfileScreen;
-
-function logout(navigation: any) {
-  throw new Error('Function not implemented.');
-}
-

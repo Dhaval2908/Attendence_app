@@ -8,6 +8,7 @@ import {
   Image,
   StyleSheet,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import axios from "axios";
@@ -17,22 +18,14 @@ import { fontSizeMedium, fontSizeSmall, headerHeight, headerPadding, headerWidth
 import { RootStackParamList } from "../../navigation/types";
 import { AuthContext } from "../../context/AuthContext";
 
-// Define the navigation parameter types
-// type RootStackParamList = {
-//   Login: undefined;
-//   SignUp: undefined;
-//   // Home: undefined;
-//   Nav: undefined;
-// };
-
-// Type for the props of this screen
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const { login } = useContext(AuthContext)!;
-  const [email, setEmail] = useState("khunt2@uwindsor.ca");
-  const [password, setPassword] = useState("Dhaval@123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -40,33 +33,31 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
+    setIsLoading(true);
+    
     try {
       const response = await axios.post(`${Config.BASE_URL}/api/auth/login`, {
         email,
         password,
       });
 
-      console.log("Response Data:", response.data);
-
       if (response.status === 200) {
-        // Alert.alert("Success", "Logged in successfully!");
-        await login(response.data)
-        navigation.navigate("Nav"); // Navigate to Home screen
-      } else {
-        Alert.alert("Error", "Invalid credentials.");
+        await login(response.data);
+        navigation.navigate("Nav");
       }
     } catch (error: any) {
       console.error("Login Error:", error);
+      let errorMessage = "Something went wrong. Please try again.";
+      
       if (error.response) {
-        // Server responded with a status other than 2xx
-        Alert.alert("Error", error.response.data.error || "Invalid credentials.");
+        errorMessage = error.response.data.error || "Invalid credentials.";
       } else if (error.request) {
-        // Request was made but no response
-        Alert.alert("Error", "No response from server. Check your network.");
-      } else {
-        // Something else happened
-        Alert.alert("Error", "Something went wrong. Please try again.");
+        errorMessage = "No response from server. Check your network.";
       }
+      
+      Alert.alert("Error", errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -79,30 +70,29 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
       <TextInput
         style={styles.input}
-        // placeholder="Email"
-        placeholder="khunt2@uwindsor.ca"
+        placeholder="Email"
         placeholderTextColor="#555"
-        // value={email}
-        value="khunt2@uwindsor.ca"
+        value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
+        editable={!isLoading}
       />
 
       <View style={styles.passwordContainer}>
         <TextInput
           style={styles.passwordInput}
-          // placeholder="Password"
-          placeholder="Dhaval@123"
+          placeholder="Password"
           placeholderTextColor="#555"
           secureTextEntry={!isPasswordVisible}
-          // value={password}
-          value="Dhavl@123"
+          value={password}
           onChangeText={setPassword}
           autoCapitalize="none"
+          editable={!isLoading}
         />
         <TouchableOpacity
           onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+          disabled={isLoading}
         >
           <Ionicons
             name={isPasswordVisible ? "eye" : "eye-off"}
@@ -112,24 +102,32 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Log In</Text>
+      <TouchableOpacity 
+        style={[styles.button, isLoading && styles.disabledButton]} 
+        onPress={handleLogin}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <ActivityIndicator color={Colors.white} />
+        ) : (
+          <Text style={styles.buttonText}>Log In</Text>
+        )}
       </TouchableOpacity>
 
       <Text style={styles.forgotPassword}>Forgot Password?</Text>
 
       <View style={styles.signupContainer}>
         <Text style={styles.text}>Don’t have an account?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+        <TouchableOpacity 
+          onPress={() => navigation.navigate("SignUp")}
+          disabled={isLoading}
+        >
           <Text style={styles.signupText}> Sign Up</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 };
-
-
-export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -181,6 +179,9 @@ const styles = StyleSheet.create({
     borderRadius: smartScale(30),
     marginBottom: smartScale(12),
   },
+  disabledButton: {
+    backgroundColor: Colors.bg,
+  },
   buttonText: {
     color: Colors.bg,
     fontSize: fontSizeMedium,
@@ -206,3 +207,5 @@ const styles = StyleSheet.create({
     color: Colors.primaryColor,
   },
 });
+
+export default LoginScreen;

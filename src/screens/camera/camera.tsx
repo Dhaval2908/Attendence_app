@@ -1,106 +1,128 @@
-// import React, { useRef, useState, useEffect } from 'react';
-// import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
-// import { Camera, useCameraDevices } from 'react-native-vision-camera';
-// import Ionicons from '@react-native-vector-icons/ionicons';
+import React, { useRef, useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from "react-native";
+import { Camera, useCameraDevices } from "react-native-vision-camera";
+import vision from "@react-native-ml-kit/face-detection";  // ✅ ML Kit Import
+import axios from "axios";
+import Config from "react-native-config";
+import { useNavigation } from "@react-navigation/native";  // ✅ Import Navigation
+import { StackNavigationProp } from "@react-navigation/stack";
+import { BottomTabParamList, RootStackParamList } from "../../navigation/types";
 
-// const CameraScreen = ({ navigation }) => {
-//   const devices = useCameraDevices();
-//   const cameraRef = useRef(null);
-//   const [capturedImages, setCapturedImages] = useState([]);
-//   const [angleIndex, setAngleIndex] = useState(0);
-//   const [isCapturing, setIsCapturing] = useState(false);
+const CameraScreen = () => {
+  const navigation = useNavigation(); // ✅ Initialize Navigation
+  const devices = useCameraDevices();
+  const device = devices.find((d) => d.position === "front");
+  const camera = useRef<Camera>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const permission = await Camera.requestCameraPermission();
+      if (permission !== "granted") {
+        Alert.alert("Permission Denied", "Camera access is required.");
+      }
+    })();
+  }, []);
+
+  if (!device) return <Text>Camera not available</Text>;
+
+  const takePhoto = async () => {
+    try {
+      if (camera.current) {
+        setLoading(true);
+        const photo = await camera.current.takePhoto();
+        const imagePath: string = `file://${photo.path}`;
   
-//   const angles = ['Front', 'Left', 'Right', 'Top', 'Bottom'];
+        try {
+          const faces = await vision.detect(imagePath);
+          if (faces.length > 0) {
+            // ✅ Wait for upload to complete before showing success message
+            const uploadSuccess = await uploadImage(imagePath);
+            if (uploadSuccess) {
+              Alert.alert("Success", "✅ Face detected & uploaded!", [
+                { text: "OK", onPress: () => navigation.navigate("Nav", { screen: "Home" } as never),
 
-//   useEffect(() => {
-//     // Ask for camera permission
-//     (async () => {
-//       const status = await Camera.requestCameraPermission();
-//       if (status !== 'authorized') {
-//         alert('Camera permission denied');
-//         navigation.goBack();
-//       }
-//     })();
-//   }, []);
+            }, // ✅ Navigate to Home
+              ]);
+            } else {
+              Alert.alert("Upload Failed", "Face detected, but image upload failed.");
+            }
+          } else {
+            Alert.alert("No Face Detected", "Please try again.");
+          }
+        } catch (error) {
+          console.error("Face Detection Error:", error);
+          Alert.alert("Error", "Face detection failed!");
+        } finally {
+          setLoading(false);
+        }
+      }
+    } catch (error) {
+      console.error("Camera Error:", error);
+      Alert.alert("Error", "Something went wrong with the camera!");
+      setLoading(false);
+    }
+  };
+  
+  const uploadImage = async (imagePath: string) => {
+    const formData = new FormData();
+    formData.append("image", {
+      uri: imagePath,
+      type: "image/jpeg",
+      name: "face.jpg",
+    });
+  
+    try {
+      const response = await axios.post(`${Config.BASE_URL}/api/upload/`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      console.log("Upload Response:", response.data);
+      return true; // ✅ Return success
+    } catch (error) {
+      console.error("Upload Error:", error);
+      return false; // ❌ Return failure
+    }
+  };
+  
+  return (
+    <View style={styles.container}>
+      <Camera ref={camera} style={styles.camera} device={device} isActive={true} photo={true} />
+      <View style={styles.overlay}>
+        {loading ? (
+          <ActivityIndicator size="large" color="white" />
+        ) : (
+          <TouchableOpacity style={styles.captureButton} onPress={takePhoto}>
+            <View style={styles.innerCircle} />
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
+};
 
-//   const capturePhoto = async () => {
-//     if (cameraRef.current && !isCapturing) {
-//       setIsCapturing(true);
-//       const photo = await cameraRef.current.takePhoto();
-//       setCapturedImages([...capturedImages, { uri: `file://${photo.path}`, angle: angles[angleIndex] }]);
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#000" },
+  camera: { flex: 1 },
+  overlay: {
+    position: "absolute",
+    bottom: 100,
+    width: "100%",
+    alignItems: "center",
+  },
+  captureButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  innerCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "white",
+  },
+});
 
-//       if (angleIndex < angles.length - 1) {
-//         setAngleIndex(angleIndex + 1); // Move to the next angle
-//       } else {
-//         uploadImages(); // Upload after last angle
-//       }
-//       setIsCapturing(false);
-//     }
-//   };
-
-//   const uploadImages = async () => {
-//     const formData = new FormData();
-//     capturedImages.forEach((img, index) => {
-//       formData.append(`image_${index}`, {
-//         uri: img.uri,
-//         name: `face_${angles[index]}.jpg`,
-//         type: 'image/jpeg',
-//       });
-//     });
-
-//     try {
-//       const response = await fetch('http://your-backend-url.com/upload', {
-//         method: 'POST',
-//         body: formData,
-//         headers: { 'Content-Type': 'multipart/form-data' },
-//       });
-//       const result = await response.json();
-//       alert('Upload successful!');
-//     } catch (error) {
-//       console.error('Upload failed:', error);
-//     }
-//   };
-
-//   if (!devices.front) return <Text>No Camera Found</Text>;
-
-//   return (
-//     <View style={styles.container}>
-//       <Camera
-//         ref={cameraRef}
-//         device={devices.front}
-//         isActive={true}
-//         photo={true}
-//         style={styles.camera}
-//       />
-//       <Text style={styles.angleText}>Capture: {angles[angleIndex]} Face</Text>
-
-//       <TouchableOpacity style={styles.captureButton} onPress={capturePhoto}>
-//         <Ionicons name="camera-outline" size={40} color="white" />
-//       </TouchableOpacity>
-
-//       <View style={styles.previewContainer}>
-//         {capturedImages.map((img, index) => (
-//           <Image key={index} source={{ uri: img.uri }} style={styles.previewImage} />
-//         ))}
-//       </View>
-//     </View>
-//   );
-// };
-
-// export default CameraScreen;
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1, backgroundColor: 'black' },
-//   camera: { flex: 1 },
-//   angleText: { color: 'white', fontSize: 18, textAlign: 'center', marginVertical: 10 },
-//   captureButton: {
-//     position: 'absolute',
-//     bottom: 30,
-//     alignSelf: 'center',
-//     backgroundColor: 'red',
-//     borderRadius: 50,
-//     padding: 15,
-//   },
-//   previewContainer: { flexDirection: 'row', justifyContent: 'center', marginVertical: 10 },
-//   previewImage: { width: 50, height: 50, marginHorizontal: 5, borderRadius: 10 },
-// });
+export default CameraScreen;

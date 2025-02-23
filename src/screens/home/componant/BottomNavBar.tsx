@@ -10,6 +10,7 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import { Colors } from '../../../theme/colors';
 import { fontSizeContent, fontSizeExtraSmall, fontSizeSmall, headerWidth, smartScale } from '../../../theme/constants/normalize';
 import { Animated, StyleSheet, View } from 'react-native';
+import CameraScreen from '../../camera/camera';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -75,6 +76,15 @@ const BottomTabNavigator = () => {
         <Tab.Screen 
           name="More" 
           component={MoreScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="ellipsis-horizontal" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tab.Screen 
+          name="Camera" 
+          component={CameraScreen}
           options={{
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="ellipsis-horizontal" size={size} color={color} />

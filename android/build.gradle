@@ -16,6 +16,14 @@ buildscript {
         classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
     }
+    subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty("android")) {
+            project.android.compileSdkVersion = 35
+        }
+    }
+}
+
 }
 
 apply plugin: "com.facebook.react.rootproject"

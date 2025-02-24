@@ -21,31 +21,31 @@ const BottomTabNavigator = () => {
 
   return (
     <View style={styles.screen}>
-      <Animated.View style={[styles.animatedTab, { 
-        transform: [{ translateY: tabBarAnimation }] 
+      <Animated.View style={[styles.animatedTab, {
+        transform: [{ translateY: tabBarAnimation }]
       }]}>
 
       </Animated.View>
       <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: Colors.primaryColor,
-        tabBarInactiveTintColor: Colors.bg,
-        tabBarStyle: {  
-          borderTopWidth: 0.1, // Remove top border
-          height: smartScale(60), // Set height of tab bar
-          margin: smartScale(1),
-          // borderRadius: smartScale(15),
-          elevation: 0,
-        },
-        tabBarLabelStyle: {
-          fontSize: fontSizeContent, 
-          fontFamily: 'Poppins'
-        },
-      }}
-    >
-        <Tab.Screen 
-          name="Home" 
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: Colors.primaryColor,
+          tabBarInactiveTintColor: Colors.bg,
+          tabBarStyle: {
+            borderTopWidth: 0.1, // Remove top border
+            height: smartScale(60), // Set height of tab bar
+            margin: smartScale(1),
+            // borderRadius: smartScale(15),
+            elevation: 0,
+          },
+          tabBarLabelStyle: {
+            fontSize: fontSizeContent,
+            fontFamily: 'Poppins'
+          },
+        }}
+      >
+        <Tab.Screen
+          name="Home"
           component={HomeScreen}
           initialParams={params}
           options={{
@@ -54,8 +54,8 @@ const BottomTabNavigator = () => {
             ),
           }}
         />
-        <Tab.Screen 
-          name="Report" 
+        <Tab.Screen
+          name="Report"
           component={ReportScreen}
           options={{
             tabBarIcon: ({ color, size }) => (
@@ -63,8 +63,8 @@ const BottomTabNavigator = () => {
             ),
           }}
         />
-        <Tab.Screen 
-          name="Profile" 
+        <Tab.Screen
+          name="Profile"
           component={ProfileScreen}
           initialParams={params}
           options={{
@@ -73,8 +73,17 @@ const BottomTabNavigator = () => {
             ),
           }}
         />
-        <Tab.Screen 
-          name="More" 
+          <Tab.Screen
+            name="Camera"
+            component={CameraScreen}
+            options={{
+              tabBarIcon: ({ color, size }) => (
+                <Ionicons name="camera" size={size} color={color} />
+              ),
+            }}
+          />
+        <Tab.Screen
+          name="More"
           component={MoreScreen}
           options={{
             tabBarIcon: ({ color, size }) => (
@@ -82,15 +91,7 @@ const BottomTabNavigator = () => {
             ),
           }}
         />
-        <Tab.Screen 
-          name="Camera" 
-          component={CameraScreen}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="ellipsis-horizontal" size={size} color={color} />
-            ),
-          }}
-        />
+
       </Tab.Navigator>
     </View>
   );

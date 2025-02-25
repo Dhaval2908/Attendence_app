@@ -7,6 +7,7 @@ import Ionicons from '@react-native-vector-icons/ionicons';
 import Geolocation from '@react-native-community/geolocation';
 import Config from 'react-native-config';
 import moment from 'moment';
+import { PermissionsAndroid, Platform } from 'react-native';
 
 interface Event {
   _id: string;
@@ -16,13 +17,95 @@ interface Event {
   startTime: Date | string | number;
   endTime: Date | string | number;
 }
+const requestLocationPermission = async () => {
+  if (Platform.OS === 'android') {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    } catch (err) {
+      console.warn(err);
+      return false;
+    }
+  }
+  return true;
+};
+const checkLocationPermission = async () => {
+  if (Platform.OS === 'android') {
+    try {
+      const granted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+      return granted; // true or false
+    } catch (err) {
+      console.warn('Permission check error:', err);
+      return false;
+    }
+  }
+  return true; // iOS handles this differently
+};
 
 const HomeScreen = () => {
   const { user, token } = useContext(AuthContext)!;
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [address, setAddress] = useState('Fetching location...');
-
+  const [address, setAddress] = useState<string>('Fetching location...');
+  
+  const getLocation = async () => {
+    console.log("Getting location...");
+    return new Promise((resolve, reject) => {
+      Geolocation.getCurrentPosition(
+        (position) => {
+          console.log(position)
+          resolve({
+            lat: parseFloat(position.coords.latitude.toFixed(5)),
+            lng: parseFloat(position.coords.longitude.toFixed(5)),
+            time: Date.now(),
+          });
+        },
+        (error) => {
+          console.log(
+            "getCurrentPosition background error",
+            JSON.stringify(error)
+          );
+          reject(error);
+        },
+       
+      )
+  })};
+ 
+  const fetchAddress = async (lat: Number, lng : Number) => {
+    try {
+      console.log(lng)
+      console.log(lat)
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+      );
+      const data = await response.json();
+      console.log(data)
+      return data.display_name || 'Address not found';
+    } catch (error) {
+      console.error('Error fetching address:', error);
+      return 'Failed to fetch address';
+    }
+  };
+  
+  // Usage in useEffect
+  useEffect(() => {
+    const updateAddress = async () => {
+      try {
+        const { lat, lng }:any = await getLocation();
+        const address = await fetchAddress(lat, lng);
+        setAddress(address); // Assuming setAddress is a state setter
+      } catch (error) {
+        setAddress(error as string); // Set error message if location fails
+      }
+    };
+  
+    updateAddress();
+  }, []);
+  
+  
+  
   useEffect(() => {
     const fetchEvents = async () => {
       if (!user) return;
@@ -47,22 +130,15 @@ const HomeScreen = () => {
   }, [user, token]);
 
   useEffect(() => {
-    Geolocation.getCurrentPosition(
-      async (info) => {
-        try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${info.coords.latitude}&lon=${info.coords.longitude}`
-          );
-          const data = await response.json();
-          setAddress(data.display_name || 'Address not found');
-        } catch (error) {
-          console.error('Error fetching address:', error);
-          setAddress('Failed to fetch address');
-        }
-      },
-      (error) => setAddress('Location permission denied'),
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-    );
+    (async () => {
+      const hasPermission = await checkLocationPermission();
+      console.log(hasPermission)
+      if(hasPermission)
+        getLocation();
+      else
+        console.log("no permission")
+
+    })();
   }, []);
   const renderEventItem = ({ item }: { item: Event }) => {
     // Convert timestamps into readable format

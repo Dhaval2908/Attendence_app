@@ -3,16 +3,25 @@ export type BottomTabParamList = {
   Profile: { userId?: string };
   Report: undefined;
   More: undefined;
-  Camera : undefined;
+  Face : undefined;
 };
 export type RootStackParamList = {
   Login: undefined;
   SignUp: undefined;
   Nav: BottomTabParamList;
+  FaceAttendance: { eventId: string };  
 };
 
 
 
+export interface IEvent {
+  _id: string;
+  name: string;
+  description: string;
+  registeredStudents: string[];
+  startTime: Date | string | number;
+  endTime: Date | string | number;
+}
 // Add these type extensions for navigation
 declare global {
   namespace ReactNavigation {

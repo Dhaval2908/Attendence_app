@@ -10,7 +10,7 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import { Colors } from '../../../theme/colors';
 import { fontSizeContent, fontSizeExtraSmall, fontSizeSmall, headerWidth, smartScale } from '../../../theme/constants/normalize';
 import { Animated, StyleSheet, View } from 'react-native';
-import CameraScreen from '../../camera/camera';
+import FaceRegistration from '../../camera/FaceRegistration';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -74,8 +74,8 @@ const BottomTabNavigator = () => {
           }}
         />
           <Tab.Screen
-            name="Camera"
-            component={CameraScreen}
+            name="Face"
+            component={FaceRegistration}
             options={{
               tabBarIcon: ({ color, size }) => (
                 <Ionicons name="camera" size={size} color={color} />

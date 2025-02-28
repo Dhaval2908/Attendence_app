@@ -3,11 +3,12 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SignUpScreen from "./screens/signup/signup";
 import LoginScreen from "./screens/login/login";
-import BottomTabNavigator from "./screens/home/componant/BottomNavBar";
+import BottomTabNavigator from "./screens/home/components/BottomNavBar";
 import { RootStackParamList } from "./navigation/types";
 import { AuthContext, AuthProvider } from "./context/AuthContext";
 import { ActivityIndicator, View } from "react-native";
 import { Colors } from "./theme/colors";
+import FaceAttendance from "./screens/camera/FaceAttendance";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -45,7 +46,11 @@ console.log(token)
             <Stack.Screen name="SignUp" component={SignUpScreen} />
           </>
         ) : (
+          <>
+          
           <Stack.Screen name="Nav" component={BottomTabNavigator} />
+          <Stack.Screen name="FaceAttendance" component={FaceAttendance} />
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>

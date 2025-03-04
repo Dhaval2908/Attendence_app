@@ -21,6 +21,7 @@ export interface IEvent {
   registeredStudents: string[];
   startTime: Date | string | number;
   endTime: Date | string | number;
+  isClockInAllowed?: boolean;
 }
 // Add these type extensions for navigation
 declare global {

@@ -8,6 +8,12 @@ import Events from './components/event';
 import Map from './components/map';
 import { IEvent } from '../../navigation/types';
 
+
+interface EventWithClockIn extends IEvent {
+  isClockInAllowed: boolean;
+}
+
+
 const HomeScreen = () => {
   const navigation = useNavigation(); // ✅ Now inside the component
   const { user, token } = useContext(AuthContext)!;
@@ -26,7 +32,10 @@ const HomeScreen = () => {
       const data = await response.json();
 
       if (Array.isArray(data)) {
-        const filteredEvents = data.filter(event => event.registeredStudents.includes(user.id));
+        const filteredEvents = data.filter(event => event.registeredStudents.includes(user.id)).map(event => ({
+          ...event,
+          isClockInAllowed: checkClockInAllowed(event.startTime,),
+        }));
         setEvents(filteredEvents);
       }
     } catch (error) {
@@ -35,6 +44,21 @@ const HomeScreen = () => {
       setLoading(false);
       setRefreshing(false);
     }
+  };
+
+  // Function to check if Clock In is allowed (within 5 minutes before event start)
+  const checkClockInAllowed = (eventStartTime: string): boolean => {
+    const now = new Date();
+    const eventStart = new Date(eventStartTime);
+
+    // Check if event date matches the current date
+    const isSameDate = now.toDateString() === eventStart.toDateString();
+
+    // Calculate the difference in minutes
+    const differenceInMinutes = (eventStart.getTime() - now.getTime()) / (1000 * 60);
+
+    // Return true only if same date and within 5 minutes before the event start time
+    return isSameDate && differenceInMinutes <= 5 && differenceInMinutes >= 0;
   };
 
   useEffect(() => {

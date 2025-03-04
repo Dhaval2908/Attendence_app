@@ -29,7 +29,8 @@ const Events: React.FC<EventsProps> = ({ events, loading, onRefresh, refreshing,
           <Text style={styles.eventDescription}>{item.description}</Text>
           <Text style={styles.eventDate}>{`${start} - ${end}`}</Text>
         </View>
-        <TouchableOpacity style={styles.button} onPress={() => onClockIn(item._id)}>
+        <TouchableOpacity 
+          style={[styles.button, { opacity: item.isClockInAllowed ? 1 : 0.5 }]} onPress={() => onClockIn(item._id)} disabled={!item.isClockInAllowed} >
           <Text style={styles.buttonText}>Clock In</Text>
         </TouchableOpacity>
       </View>

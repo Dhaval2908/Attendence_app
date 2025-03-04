@@ -26,6 +26,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -34,7 +35,8 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     }
 
     setIsLoading(true);
-    
+    setError(null);
+
     try {
       const response = await axios.post(`${Config.BASE_URL}/api/auth/login`, {
         email,
@@ -46,16 +48,27 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         navigation.navigate("Nav");
       }
     } catch (error: any) {
-      console.error("Login Error:", error);
-      let errorMessage = "Something went wrong. Please try again.";
-      
       if (error.response) {
-        errorMessage = error.response.data.error || "Invalid credentials.";
+        // Server responded but with an error status (4xx, 5xx, etc.)
+        if (error.response.status === 401 || error.response.status === 403) {
+          // Unauthorized or Forbidden - likely invalid credentials
+          setError("Invalid credentials. Please try again.");
+        } else if (error.response.status >= 500) {
+          // Internal Server Error, Bad Gateway, etc.
+          setError("Server error. Please try again later.");
+        } else {
+          // Other client error (like 404 - unlikely for login, but let's handle it)
+          setError("Something went wrong. Please try again.");
+        }
       } else if (error.request) {
-        errorMessage = "No response from server. Check your network.";
+        // No response received at all (network error, timeout, etc.)
+        setError("Network error. Please check your internet connection.");
+      } else {
+        // Other unexpected errors (could be parsing issues, unknown Axios errors, etc.)
+        setError("Unexpected error occurred. Please try again.");
       }
-      
-      Alert.alert("Error", errorMessage);
+      setEmail(""); // Clear fields
+      setPassword("");
     } finally {
       setIsLoading(false);
     }
@@ -67,7 +80,9 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         source={require("../../assets/images/Uni_logo.png")}
         style={styles.logo}
       />
-
+      {error && (
+      <Text style={styles.errorText}>{error}</Text>
+      )}
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -142,6 +157,12 @@ const styles = StyleSheet.create({
     height: smartScale(120),
     marginBottom: smartScale(18),
     borderRadius: smartScale(20)
+  },
+  errorText: {
+    color: Colors.error || "red", // Replace with your theme's error color if available
+    marginBottom: smartScale(8),
+    fontSize: fontSizeSmall,
+    textAlign: "center",
   },
   input: {
     width: headerWidth,

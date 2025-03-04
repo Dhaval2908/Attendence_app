@@ -71,7 +71,7 @@
     if (isFaceRegistered) {
       return (
         <View style={styles.registeredContainer}>
-          <Text style={styles.registeredText}>✅ Your face is already registered!</Text>
+          <Text style={styles.registeredText}>Your face is already registered!</Text>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.navigate("Nav", { screen: "Home" } as never)}

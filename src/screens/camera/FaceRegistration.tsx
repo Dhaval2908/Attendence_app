@@ -5,6 +5,8 @@ import Config from "react-native-config";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../../context/AuthContext";
 import CameraComponent from "./components/CameraComponent";
+import { fontSizeLarge, smartScale } from "../../theme/constants/normalize";
+import { Colors } from "../../theme/colors";
 
 const FaceRegistration = () => {
   const navigation = useNavigation();
@@ -65,7 +67,7 @@ const FaceRegistration = () => {
   if (isFaceRegistered) {
     return (
       <View style={styles.container}>
-        <Text style={styles.text}>✅ Your face is already registered!</Text>
+        <Text style={styles.text}>Your face is already registered!</Text>
       </View>
     );
   }
@@ -74,10 +76,10 @@ const FaceRegistration = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#000" },
-  text: { color: "white", fontSize: 18 },
+  container: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.white },
+  text: { color: Colors.bg, fontSize: fontSizeLarge },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#000" },
-  loadingText: { color: "white", fontSize: 18, marginTop: 10 },
+  loadingText: { color: "white", fontSize: fontSizeLarge, marginTop: smartScale(10) },
 });
 
 export default FaceRegistration;

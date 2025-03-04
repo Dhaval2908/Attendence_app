@@ -35,16 +35,16 @@ const CameraComponent: React.FC<CameraComponentProps> = ({ onCapture }) => {
         const photo = await camera.current.takePhoto();
         const imagePath: string = `file://${photo.path}`;
 
-        console.log("📸 Photo taken at:", imagePath);
+        console.log("Photo taken at:", imagePath);
 
         const faces = await vision.detect(imagePath);
-        console.log("👀 Faces detected:", faces.length);
+        console.log("Faces detected:", faces.length);
 
         if (faces.length > 0) {
-          console.log("✅ Face detected, calling onCapture...");
+          console.log("Face detected, calling onCapture...");
           onCapture(imagePath);
         } else {
-          console.log("❌ No face detected, attempting to show alert...");
+          console.log("No face detected, attempting to show alert...");
           setTimeout(() => {
             if (isFocused) {
               Alert.alert("No Face Detected", "Please try again.");

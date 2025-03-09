@@ -8,7 +8,7 @@ export type BottomTabParamList = {
 export type RootStackParamList = {
   Login: undefined;
   SignUp: undefined;
-  Nav: BottomTabParamList;
+  Nav: undefined;
   FaceAttendance: { eventId: string };  
 };
 

@@ -1,15 +1,20 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useNavigation } from "@react-navigation/native"; // ✅ Moved inside the component
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useNavigation } from "@react-navigation/native";
 import { Colors } from '../../theme/colors';
 import { AuthContext } from '../../context/AuthContext';
 import Config from 'react-native-config';
 import Events from './components/event';
 import Map from './components/map';
 import { IEvent } from '../../navigation/types';
+import { fontNormalize, smartScale } from '../../theme/constants/normalize';
+
+interface EventWithClockIn extends IEvent {
+  isClockInAllowed: boolean;
+}
 
 const HomeScreen = () => {
-  const navigation = useNavigation(); // ✅ Now inside the component
+  const navigation = useNavigation(); 
   const { user, token } = useContext(AuthContext)!;
   const [events, setEvents] = useState<IEvent[]>(() => []);
 
@@ -24,9 +29,11 @@ const HomeScreen = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
-
       if (Array.isArray(data)) {
-        const filteredEvents = data.filter(event => event.registeredStudents.includes(user.id));
+        const filteredEvents = data.filter(event => {return event.registeredStudents.includes(user.id);}).map(event => ({
+          ...event,
+        }));
+
         setEvents(filteredEvents);
       }
     } catch (error) {
@@ -49,7 +56,7 @@ const HomeScreen = () => {
     <View style={styles.container}>
       <Text style={styles.header}>Your Location</Text>
       <Map />
-      <Text style={styles.header}>Upcoming Events</Text>
+      <Text style={styles.header}>Events</Text>
       <Events events={events} loading={loading} onRefresh={fetchEvents} refreshing={refreshing} onClockIn={faceAttendance} />
     </View>
   );
@@ -59,5 +66,5 @@ export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.white },
-  header: { fontSize: 20, fontWeight: 'bold', margin: 20 },
+  header: { fontSize: fontNormalize(23), fontWeight: 'bold', marginHorizontal: smartScale(20),marginTop:smartScale(20) },
 });

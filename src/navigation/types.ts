@@ -8,8 +8,9 @@ export type BottomTabParamList = {
 export type RootStackParamList = {
   Login: undefined;
   SignUp: undefined;
-  Nav: BottomTabParamList;
+  Nav: undefined;
   FaceAttendance: { eventId: string };  
+  Face: undefined;
 };
 
 
@@ -21,6 +22,7 @@ export interface IEvent {
   registeredStudents: string[];
   startTime: Date | string | number;
   endTime: Date | string | number;
+  isClockInAllowed?: boolean;
 }
 // Add these type extensions for navigation
 declare global {

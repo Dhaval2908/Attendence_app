@@ -7,8 +7,11 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Alert,
   ActivityIndicator,
+  Modal,
+  TouchableWithoutFeedback,
+  Animated,
+  Easing,
 } from "react-native";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import axios from "axios";
@@ -27,10 +30,14 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalErrorMessage, setModalErrorMessage] = useState("");
+
+  const fadeAnim = useState(new Animated.Value(0))[0];
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Please enter email and password.");
+      showErrorModal("Please enter both email and password.");
       return;
     }
 
@@ -48,25 +55,36 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         navigation.navigate("Nav");
       }
     } catch (error: any) {
+      let errorMessage = "Something went wrong. Please try again.";
+
       if (error.response) {
-        // Server responded but with an error status (4xx, 5xx, etc.)
-        if (error.response.status === 401 || error.response.status === 403) {
-          // Unauthorized or Forbidden - likely invalid credentials
-          setError("Invalid credentials. Please try again.");
-        } else if (error.response.status >= 500) {
-          // Internal Server Error, Bad Gateway, etc.
-          setError("Server error. Please try again later.");
-        } else {
-          // Other client error (like 404 - unlikely for login, but let's handle it)
-          setError("Something went wrong. Please try again.");
+        // Server errors (4xx, 5xx)
+        switch (error.response.status) {
+          case 400:
+            errorMessage = "Invalid request. Please check your input.";
+            break;
+          case 401:
+          case 403:
+            errorMessage = "Invalid credentials. Please try again.";
+            break;
+          case 500:
+          case 502:
+          case 503:
+            errorMessage = "Server is currently unavailable. Please try again later.";
+            break;
+          default:
+            errorMessage = "Unexpected error occurred. Please try again.";
+            break;
         }
       } else if (error.request) {
-        // No response received at all (network error, timeout, etc.)
-        setError("Network error. Please check your internet connection.");
+        // No response received (network issues)
+        errorMessage = "Network error. Please check your internet connection.";
       } else {
-        // Other unexpected errors (could be parsing issues, unknown Axios errors, etc.)
-        setError("Unexpected error occurred. Please try again.");
+        // Other unexpected issues
+        errorMessage = "An unknown error occurred. Please try again.";
       }
+
+      showErrorModal(errorMessage);
       setEmail(""); // Clear fields
       setPassword("");
     } finally {
@@ -74,15 +92,28 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  const showErrorModal = (message: string) => {
+    setModalErrorMessage(message);
+    setModalVisible(true);
+    fadeIn();
+  };
+
+  const fadeIn = () => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 300,
+      easing: Easing.ease,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const hideModal = () => {
+    setModalVisible(false);
+  };
+
   return (
     <View style={styles.container}>
-      <Image
-        source={require("../../assets/images/Uni_logo.png")}
-        style={styles.logo}
-      />
-      {error && (
-      <Text style={styles.errorText}>{error}</Text>
-      )}
+      <Image source={require("../../assets/images/6343845.jpg")} style={styles.logo} />
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -93,7 +124,6 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         autoCapitalize="none"
         editable={!isLoading}
       />
-
       <View style={styles.passwordContainer}>
         <TextInput
           style={styles.passwordInput}
@@ -109,37 +139,41 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           onPress={() => setIsPasswordVisible(!isPasswordVisible)}
           disabled={isLoading}
         >
-          <Ionicons
-            name={isPasswordVisible ? "eye" : "eye-off"}
-            size={smartScale(22)}
-            color={Colors.primaryColor}
-          />
+          <Ionicons name={isPasswordVisible ? "eye" : "eye-off"} size={smartScale(22)} color={Colors.primaryColor} />
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity 
-        style={[styles.button, isLoading && styles.disabledButton]} 
+      <TouchableOpacity
+        style={[styles.button, isLoading && styles.disabledButton]}
         onPress={handleLogin}
         disabled={isLoading}
       >
-        {isLoading ? (
-          <ActivityIndicator color={Colors.white} />
-        ) : (
-          <Text style={styles.buttonText}>Log In</Text>
-        )}
+        {isLoading ? <ActivityIndicator color={Colors.white} /> : <Text style={styles.buttonText}>Log In</Text>}
       </TouchableOpacity>
 
       <Text style={styles.forgotPassword}>Forgot Password?</Text>
 
       <View style={styles.signupContainer}>
         <Text style={styles.text}>Don’t have an account?</Text>
-        <TouchableOpacity 
-          onPress={() => navigation.navigate("SignUp")}
-          disabled={isLoading}
-        >
+        <TouchableOpacity onPress={() => navigation.navigate("SignUp")} disabled={isLoading}>
           <Text style={styles.signupText}> Sign Up</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Custom Error Modal */}
+      <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={hideModal}>
+        <TouchableWithoutFeedback onPress={hideModal}>
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalContainer, { opacity: fadeAnim }]}>
+              <Text style={styles.modalTitle}>Oops!</Text>
+              <Text style={styles.modalMessage}>{modalErrorMessage}</Text>
+              <TouchableOpacity onPress={hideModal} style={styles.modalButton}>
+                <Text style={styles.modalButtonText}>Okay</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 };
@@ -153,16 +187,10 @@ const styles = StyleSheet.create({
     padding: smartScale(20),
   },
   logo: {
-    width: smartScale(120),
-    height: smartScale(120),
+    width: smartScale(200),
+    height: smartScale(200),
     marginBottom: smartScale(18),
-    borderRadius: smartScale(20)
-  },
-  errorText: {
-    color: Colors.error || "red", // Replace with your theme's error color if available
-    marginBottom: smartScale(8),
-    fontSize: fontSizeSmall,
-    textAlign: "center",
+    borderRadius: smartScale(20),
   },
   input: {
     width: headerWidth,
@@ -194,7 +222,7 @@ const styles = StyleSheet.create({
   button: {
     width: headerWidth,
     height: headerHeight,
-    backgroundColor: Colors.secondaryColor,
+    backgroundColor: Colors.primaryColor,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: smartScale(30),
@@ -204,7 +232,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.bg,
   },
   buttonText: {
-    color: Colors.bg,
+    color: Colors.white,
     fontSize: fontSizeMedium,
   },
   forgotPassword: {
@@ -226,6 +254,43 @@ const styles = StyleSheet.create({
   signupText: {
     fontSize: fontSizeSmall,
     color: Colors.primaryColor,
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    backgroundColor: Colors.white,
+    width: smartScale(300),
+    borderRadius: smartScale(15),
+    padding: smartScale(20),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalTitle: {
+    fontSize: fontSizeMedium,
+    fontWeight: "bold",
+    color: Colors.primaryColor,
+    marginBottom: smartScale(10),
+  },
+  modalMessage: {
+    fontSize: fontSizeSmall,
+    color: Colors.bg,
+    marginBottom: smartScale(20),
+    textAlign: "center",
+  },
+  modalButton: {
+    backgroundColor: Colors.primaryColor,
+    paddingVertical: smartScale(10),
+    paddingHorizontal: smartScale(20),
+    borderRadius: smartScale(10),
+  },
+  modalButtonText: {
+    color: Colors.white,
+    fontSize: fontSizeMedium,
   },
 });
 

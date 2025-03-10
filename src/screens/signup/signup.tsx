@@ -8,6 +8,10 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Animated,
+  TouchableWithoutFeedback,
+  Modal,
+  Easing,
 } from "react-native";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { StackScreenProps } from "@react-navigation/stack";
@@ -33,15 +37,53 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
   const [isPasswordVisible1, setIsPasswordVisible1] = useState(false);
   const [isPasswordVisible2, setIsPasswordVisible2] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalType, setModalType] = useState("success");
+  const fadeAnim = useState(new Animated.Value(0))[0];
 
+  const showModal = (message: string, type: string) => {
+    setModalMessage(message);
+    setModalType(type);
+    setModalVisible(true);
+    fadeIn();
+  };
+
+  const hideModal = () => {
+    setModalVisible(false);
+  };
+
+  const fadeIn = () => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 300,
+      easing: Easing.ease,
+      useNativeDriver: true,
+    }).start();
+  };
+
+
+  // Email domain validation function
+  const isValidEmailDomain = (email: string) => {
+    const allowedDomains = ["uwindsor.ca"]; // List of allowed domains
+    const emailDomain = email.split('@')[1];
+    return allowedDomains.includes(emailDomain);
+  };
+
+  
   const handleSignUp = async () => {
     // Basic validation
     if (!fullName || !email || !password || !confirmPassword) {
-      Alert.alert("Error", "Please fill in all required fields.");
+      showModal("Passwords do not match.", "error");
       return;
     }
     if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match.");
+      showModal("Passwords do not match.", "error");
+      return;
+    }
+
+    if (!isValidEmailDomain(email)) {
+      showModal("Please use a valid domain.", "error");
       return;
     }
 
@@ -60,21 +102,20 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
           studentId: role === "student" ? studentId : undefined,
           fullName,
           password,
-          role,
+          role: "student",
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        Alert.alert("Success", "Account created successfully. Please log in.");
+        showModal("Account created successfully. Please log in.", "success");
         navigation.navigate("Login");
       } else {
-        Alert.alert("Error", data.error || "Something went wrong.");
+        showModal(data.error || "Something went wrong.", "error");
       }
     } catch (error) {
-      console.error("SignUp Error:", error);
-      Alert.alert("Error", "Failed to connect to the server.");
+      showModal("Failed to connect to the server.", "error");
     } finally {
       setLoading(false);
     }
@@ -83,10 +124,10 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       {/* Logo */}
-      <Image source={require("../../assets/images/Uni_logo.png")} style={styles.logo} />
+      <Image source={require("../../assets/images/6343845.jpg")} style={styles.logo} />
 
       {/* Role Selection */}
-      <View style={styles.roleContainer}>
+      {/* <View style={styles.roleContainer}>
         <TouchableOpacity
           style={[styles.roleButton, role === "student" && styles.roleButtonSelected]}
           onPress={() => setRole("student")}
@@ -103,7 +144,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
             Admin
           </Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       {/* Conditionally Show Student ID */}
       {role === "student" && (
@@ -134,6 +175,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
+        autoCapitalize="none"
       />
 
       {/* Password Input */}
@@ -182,6 +224,21 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.loginText}> Log In</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Custom Error Modal */}
+      <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={hideModal}>
+        <TouchableWithoutFeedback onPress={hideModal}>
+          <View style={styles.modalOverlay}>
+            <Animated.View style={[styles.modalContainer, { opacity: fadeAnim }]}>
+              <Text style={styles.modalTitle}>Oops!</Text>
+              <Text style={styles.modalMessage}>{modalMessage}</Text>
+              <TouchableOpacity onPress={hideModal} style={styles.modalButton}>
+                <Text style={styles.modalButtonText}>Okay</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 };
@@ -198,8 +255,8 @@ const styles = StyleSheet.create({
     padding: smartScale(20),
   },
   logo: {
-    width: smartScale(120),
-    height: smartScale(120),
+    width: smartScale(200),
+    height: smartScale(200),
     marginBottom: smartScale(18),
     borderRadius: smartScale(20)
   },
@@ -258,7 +315,7 @@ const styles = StyleSheet.create({
   button: {
     width: headerWidth,
     height: headerHeight,
-    backgroundColor: Colors.secondaryColor,
+    backgroundColor: Colors.primaryColor,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: smartScale(30),
@@ -266,7 +323,7 @@ const styles = StyleSheet.create({
     marginTop: smartScale(6),
   },
   buttonText: {
-    color: Colors.bg,
+    color: Colors.white,
     fontSize: fontSizeMedium,
   },
   loginContainer: {
@@ -281,5 +338,42 @@ const styles = StyleSheet.create({
     fontSize: fontSizeSmall,
     color: Colors.primaryColor,
     
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    backgroundColor: Colors.white,
+    width: smartScale(300),
+    borderRadius: smartScale(15),
+    padding: smartScale(20),
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalTitle: {
+    fontSize: fontSizeMedium,
+    fontWeight: "bold",
+    color: Colors.primaryColor,
+    marginBottom: smartScale(10),
+  },
+  modalMessage: {
+    fontSize: fontSizeSmall,
+    color: Colors.bg,
+    marginBottom: smartScale(20),
+    textAlign: "center",
+  },
+  modalButton: {
+    backgroundColor: Colors.primaryColor,
+    paddingVertical: smartScale(10),
+    paddingHorizontal: smartScale(20),
+    borderRadius: smartScale(25),
+  },
+  modalButtonText: {
+    color: Colors.white,
+    fontSize: fontSizeMedium,
   },
 });

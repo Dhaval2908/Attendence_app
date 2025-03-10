@@ -10,6 +10,7 @@ export type RootStackParamList = {
   SignUp: undefined;
   Nav: undefined;
   FaceAttendance: { eventId: string };  
+  Face: undefined;
 };
 
 

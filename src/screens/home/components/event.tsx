@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -12,10 +11,11 @@ interface EventsProps {
   loading: boolean;
   onRefresh: () => void;
   refreshing: boolean;
-  onClockIn: (eventId: string) => void; // ✅ Added onClockIn function prop
+  onClockIn: (eventId: string) => void;
 }
 
 const Events: React.FC<EventsProps> = ({ events, loading, onRefresh, refreshing, onClockIn }) => {
+  
   const currentTime = moment(); // Get current time
   const [selectedCategory, setSelectedCategory] = useState<'Upcoming' | 'Ongoing' | 'Past'>('Upcoming'); // Initial category
 
@@ -24,12 +24,18 @@ const Events: React.FC<EventsProps> = ({ events, loading, onRefresh, refreshing,
     const start = moment(event.startTime);
     const end = moment(event.endTime);
 
-    if (currentTime.isBefore(start)) {
-      return 'Upcoming'; // Event hasn't started yet
-    } else if (currentTime.isBetween(start, end)) {
-      return 'Ongoing'; // Event is currently happening
+    const differenceInMinutes = currentTime.diff(start, 'minutes'); // Time difference from now
+
+    // Check the time difference to determine event status
+    if (differenceInMinutes < 0) {
+      // Upcoming event (starts in the future)
+      return 'Upcoming';
+    } else if (differenceInMinutes >= 0 && differenceInMinutes <= end.diff(start, 'minutes')) {
+      // Ongoing event
+      return 'Ongoing';
     } else {
-      return 'Past'; // Event has ended
+      // Past event
+      return 'Past';
     }
   };
 
@@ -54,7 +60,7 @@ const Events: React.FC<EventsProps> = ({ events, loading, onRefresh, refreshing,
           <Text style={styles.eventDescription}>{item.description}</Text>
           <Text style={styles.eventDate}>{`${start} - ${end}`}</Text>
         </View>
-        {category !== 'Past' && (
+        {category === 'Ongoing' && (
           <TouchableOpacity style={styles.button} onPress={() => onClockIn(item._id)}>
             <Text style={styles.buttonText}>Clock In</Text>
           </TouchableOpacity>
@@ -71,51 +77,33 @@ const Events: React.FC<EventsProps> = ({ events, loading, onRefresh, refreshing,
       {/* Category buttons */}
       <View style={styles.categoryButtons}>
         <TouchableOpacity
-          style={[
-            styles.categoryButton,
-            selectedCategory === 'Upcoming' && styles.selectedCategoryButton,
-          ]}
+          style={[styles.categoryButton, selectedCategory === 'Upcoming' && styles.selectedCategoryButton]}
           onPress={() => setSelectedCategory('Upcoming')}
         >
           <Text
-            style={[
-              styles.categoryButtonText,
-              selectedCategory === 'Upcoming' && styles.selectedCategoryButtonText,
-            ]}
+            style={[styles.categoryButtonText, selectedCategory === 'Upcoming' && styles.selectedCategoryButtonText]}
           >
             Upcoming
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            styles.categoryButton,
-            selectedCategory === 'Ongoing' && styles.selectedCategoryButton,
-          ]}
+          style={[styles.categoryButton, selectedCategory === 'Ongoing' && styles.selectedCategoryButton]}
           onPress={() => setSelectedCategory('Ongoing')}
         >
           <Text
-            style={[
-              styles.categoryButtonText,
-              selectedCategory === 'Ongoing' && styles.selectedCategoryButtonText,
-            ]}
+            style={[styles.categoryButtonText, selectedCategory === 'Ongoing' && styles.selectedCategoryButtonText]}
           >
             Ongoing
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            styles.categoryButton,
-            selectedCategory === 'Past' && styles.selectedCategoryButton,
-          ]}
+          style={[styles.categoryButton, selectedCategory === 'Past' && styles.selectedCategoryButton]}
           onPress={() => setSelectedCategory('Past')}
         >
           <Text
-            style={[
-              styles.categoryButtonText,
-              selectedCategory === 'Past' && styles.selectedCategoryButtonText,
-            ]}
+            style={[styles.categoryButtonText, selectedCategory === 'Past' && styles.selectedCategoryButtonText]}
           >
             Past
           </Text>
@@ -160,19 +148,19 @@ const styles = StyleSheet.create({
     borderColor: Colors.black, // Black border for non-selected buttons
   },
   categoryButtonText: {
-   fontSize: fontNormalize(13),
-   color: Colors.black,
+    fontSize: fontNormalize(13),
+    color: Colors.black,
   },
-  eventItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: smartScale(10), marginVertical: smartScale(10), marginHorizontal: smartScale(6),backgroundColor: Colors.white, borderRadius: smartScale(10), elevation: 4 },
+  eventItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: smartScale(10), marginVertical: smartScale(10), marginHorizontal: smartScale(6), backgroundColor: Colors.white, borderRadius: smartScale(10), elevation: 4 },
   eventDetails: { flex: 1 },
   eventTitle: { fontSize: fontSizeLarge, fontWeight: 'bold' },
   eventDescription: { fontSize: fontSizeSmall, marginBottom: smartScale(10) },
   button: {
-    backgroundColor: Colors.secondaryColor,
+    backgroundColor: Colors.primaryColor,
     padding: smartScale(10),
     borderRadius: smartScale(5),
   },
-  buttonText: { color: Colors.primaryColor, fontSize: fontSizeSmall },
+  buttonText: { color: Colors.white, fontSize: fontSizeSmall },
   eventDate: {
     fontSize: fontSizeSmall,
     fontWeight: '600',
@@ -187,10 +175,10 @@ const styles = StyleSheet.create({
   },
   selectedCategoryButton: {
     backgroundColor: Colors.primaryColor,
-    borderColor: Colors.primaryColor,  // Highlight selected button with the primary color
+    borderColor: Colors.primaryColor, // Change border color when selected
   },
   selectedCategoryButtonText: {
-    color: Colors.white,  // Change text color to white for selected button
+    color: Colors.white,
   },
 });
 

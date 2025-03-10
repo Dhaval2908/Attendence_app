@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useNavigation } from "@react-navigation/native"; // ✅ Moved inside the component
+import { useNavigation } from "@react-navigation/native";
 import { Colors } from '../../theme/colors';
 import { AuthContext } from '../../context/AuthContext';
 import Config from 'react-native-config';
@@ -32,7 +32,6 @@ const HomeScreen = () => {
       if (Array.isArray(data)) {
         const filteredEvents = data.filter(event => {return event.registeredStudents.includes(user.id);}).map(event => ({
           ...event,
-          isClockInAllowed: checkClockInAllowed(event.startTime),
         }));
 
         setEvents(filteredEvents);
@@ -43,21 +42,6 @@ const HomeScreen = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  };
-
-  // Function to check if Clock In is allowed (within 5 minutes before event start)
-  const checkClockInAllowed = (eventStartTime: string): boolean => {
-    const now = new Date();
-    const eventStart = new Date(eventStartTime);
-
-    // Check if event date matches the current date
-    const isSameDate = now.toDateString() === eventStart.toDateString();
-
-    // Calculate the difference in minutes
-    const differenceInMinutes = (eventStart.getTime() - now.getTime()) / (1000 * 60);
-
-    // Return true only if same date and within 5 minutes before the event start time
-    return isSameDate && differenceInMinutes <= 5 && differenceInMinutes >= 0;
   };
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SignUpScreen from "./screens/signup/signup";
@@ -6,16 +6,15 @@ import LoginScreen from "./screens/login/login";
 import BottomTabNavigator from "./screens/home/components/BottomNavBar";
 import { RootStackParamList } from "./navigation/types";
 import { AuthContext, AuthProvider } from "./context/AuthContext";
-import { ActivityIndicator, View } from "react-native";
-import { Colors } from "./theme/colors";
 import FaceAttendance from "./screens/camera/FaceAttendance";
+import SplashScreen from "./screens/splash/splash";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
  const { user,token } = useContext(AuthContext)!;
-console.log(user )
-console.log(token)
+ console.log(user )
+ console.log(token)
   // if (user === null && token === null) {
   //   // Show loading spinner while checking authentication status
   //   return (
@@ -24,6 +23,18 @@ console.log(token)
   //     </View>
   //   );
   // }
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 5000); // 3 seconds
+  }, []);
+
+  // Show SplashScreen
+  if (isLoading) {
+    return <SplashScreen />;
+  }
 
   return (
     <NavigationContainer>

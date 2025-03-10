@@ -53,16 +53,9 @@ const FaceAttendance = () => {
 
         console.log("📤 Attendance FormData:", formData);
 
-        const response = await axios.post(
-            `${Config.BASE_URL}/api/attendance/mark-attendance`,
-            formData,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "multipart/form-data",
-                },
-            }
-        );
+        const response = await axios.post(`${Config.FLASK_API_URL}process_face`, formData, {
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+        });
 
         console.log("✅ Attendance Response:", response.data);
 

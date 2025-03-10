@@ -34,7 +34,7 @@ const FaceRegistration = () => {
     formData.append("image", { uri: imagePath, type: "image/jpeg", name: "face.jpg" });
   
     try {
-      const response = await axios.post(`${Config.BASE_URL}/api/upload/`, formData, {
+      const response = await axios.post(`${Config.FLASK_API_URL}register`, formData, {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
       });
   

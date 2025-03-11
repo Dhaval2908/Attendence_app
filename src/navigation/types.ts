@@ -1,7 +1,7 @@
 export type BottomTabParamList = {
   Home: { studentId?: string; email?: string };
   Profile: { userId?: string };
-  Report: undefined;
+  Report: { events: IEvent[] };
   More: undefined;
   Face : undefined;
 };

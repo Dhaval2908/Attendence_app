@@ -8,6 +8,7 @@ import { RootStackParamList } from "./navigation/types";
 import { AuthContext, AuthProvider } from "./context/AuthContext";
 import FaceAttendance from "./screens/camera/FaceAttendance";
 import SplashScreen from "./screens/splash/splash";
+import { EventsProvider } from "./context/EventsContext";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -70,8 +71,11 @@ const AppNavigator = () => {
 
 export default function App() {
   return (
+    
     <AuthProvider>
+      <EventsProvider>
       <AppNavigator />
+    </EventsProvider>
     </AuthProvider>
   );
 }

@@ -38,16 +38,18 @@ const FaceRegistration = () => {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
       });
   
-      console.log("Upload success:", response.data); // ✅ Debugging log
+      console.log("Upload success:", response.data);  
   
-      // ✅ Alert inside a timeout ensures it's executed in UI thread
+      // Trigger face registration check after a successful registration
+      checkFaceRegistration();  // Recheck if the face is registered
+  
       setTimeout(() => {
         Alert.alert("Success", "Face Registered!", [
           { text: "OK", onPress: () => navigation.navigate("Nav", { screen: "Home" } as never) },
         ]);
       }, 100);
-      } catch (error) {
-      console.error("Upload Error:", error); // ✅ Debugging log
+    } catch (error) {
+      console.error("Upload Error:", error); 
   
       setTimeout(() => {
         Alert.alert("Error", "Face registration failed. Please try again.");

@@ -53,7 +53,7 @@ const FaceAttendance = () => {
 
         console.log("📤 Attendance FormData:", formData);
 
-        const response = await axios.post(`${Config.FLASK_API_URL}process_face`, formData, {
+        const response = await axios.post(`${Config.FLASK_API_URL}/mark_attendance`, formData, {
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
         });
 

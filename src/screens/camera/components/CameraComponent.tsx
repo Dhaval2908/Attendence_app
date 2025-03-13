@@ -12,66 +12,68 @@ const CameraComponent: React.FC<CameraComponentProps> = ({ onCapture }) => {
   const devices = useCameraDevices();
   const device = devices.find((d) => d.position === "front");
   const camera = useRef<Camera>(null);
+
   const [loading, setLoading] = useState(false);
-  const isFocused = useIsFocused(); // ✅ Ensure the screen is active before alerts
+  const [isCameraReady, setIsCameraReady] = useState(false);
+  const [cooldown, setCooldown] = useState(false); // ✅ Added cooldown to prevent fast re-click
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     (async () => {
       const permission = await Camera.requestCameraPermission();
       if (permission !== "granted") {
-        setTimeout(() => Alert.alert("Permission Denied", "Camera access is required."), 100);
+        Alert.alert("Permission Denied", "Camera access is required.");
       }
     })();
   }, []);
 
+  const handleCameraReady = () => setTimeout(() => setIsCameraReady(true), 500); // ✅ Added slight delay
+
   if (!device) return <View><ActivityIndicator size="large" color="white" /></View>;
 
   const takePhoto = async () => {
-    if (!isFocused) return; // ✅ Prevent alerts when screen is inactive
+    if (!isFocused || !isCameraReady) return; 
 
     try {
-      if (camera.current) {
-        setLoading(true);
-        const photo = await camera.current.takePhoto();
-        const imagePath: string = `file://${photo.path}`;
+        await new Promise((resolve) => setTimeout(resolve, 500)); // ✅ Added delay for camera readiness
 
-        console.log("Photo taken at:", imagePath);
+        if (camera.current) {
+            setLoading(true);
 
-        const faces = await vision.detect(imagePath);
-        console.log("Faces detected:", faces.length);
+            const photo = await camera.current.takePhoto();
+            const imagePath = `file://${photo.path}`;
 
-        if (faces.length > 0) {
-          console.log("Face detected, calling onCapture...");
-          onCapture(imagePath);
-        } else {
-          console.log("No face detected, attempting to show alert...");
-          setTimeout(() => {
-            if (isFocused) {
-              Alert.alert("No Face Detected", "Please try again.");
+            const faces = await vision.detect(imagePath);
+            if (faces.length > 0) {
+                onCapture(imagePath);
+            } else {
+                Alert.alert("No Face Detected", "Please try again.");
             }
-          }, 100);
         }
-      }
     } catch (error) {
-      console.error("❌ Camera Error:", error);
-      setTimeout(() => {
-        if (isFocused) {
-          Alert.alert("Error", "Something went wrong with the camera!");
-        }
-      }, 100);
+        console.error("❌ Camera Error:", error);
+        Alert.alert("Error", "Something went wrong with the camera!");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
+
 
   return (
     <View style={styles.container}>
-      <Camera ref={camera} style={styles.camera} device={device} isActive={true} photo={true} />
+      <Camera
+        ref={camera}
+        style={styles.camera}
+        device={device}
+        isActive={isFocused}
+        photo={true}
+        onInitialized={handleCameraReady} // ✅ Ensures camera is ready
+      />
       <View style={styles.overlay}>
         {loading ? (
           <ActivityIndicator size="large" color="white" />
         ) : (
-          <TouchableOpacity style={styles.captureButton} onPress={takePhoto}>
+          <TouchableOpacity style={styles.captureButton} onPress={takePhoto} disabled={loading}>
             <View style={styles.innerCircle} />
           </TouchableOpacity>
         )}

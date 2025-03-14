@@ -3,6 +3,7 @@ export const Colors = {
     white: "#FFFFFF",
     white_70: "rgba(255, 255, 255, 0.7)",
     white_bg: "rgba(240, 236, 236, 0.8)",
+    white_bb:"#f3f4f6",
     black: '#000000',
     primaryColor: '#054E85', 
     primaryText1: '#FF0094',

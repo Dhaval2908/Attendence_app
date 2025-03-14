@@ -1,18 +1,28 @@
 import React, { useEffect, useState, useContext, useCallback } from "react";
 import { 
   View, Text, StyleSheet, Modal, TouchableOpacity, ActivityIndicator, 
-  ScrollView, RefreshControl, Animated, Easing
+  ScrollView, RefreshControl, Animated, Easing,
+  Dimensions
 } from "react-native";
 import { Calendar, DateData } from "react-native-calendars";
 import { AuthContext } from "../../context/AuthContext"; // Get token from context
 import { EventsContext } from "../../context/EventsContext"; // Use event data
 import Config from "react-native-config"; // For backend URL
 import { IEvent } from "../../navigation/types";  // ✅ Use IEvent
+import { fontNormalize, smartScale } from "../../theme/constants/normalize";
+import { Colors } from "../../theme/colors";
+
+// Get the screen height dynamically
+const { height: screenHeight } = Dimensions.get('window');
+
+// Define the maximum height as half of the screen height
+const maxEventHeight = screenHeight / 2;
+
 
 const ReportScreen = () => {
   const { token } = useContext(AuthContext)!; // Get auth token
   const { events, refreshEvents } = useContext(EventsContext)!; // Get events & refresh function from context
-  const [selectedEvent, setSelectedEvent] = useState<IEvent | null>(null);
+  const [selectedEvents, setSelectedEvents] = useState<IEvent[]>([]); // Store multiple events
   const [modalVisible, setModalVisible] = useState(false);
   const [attendanceStats, setAttendanceStats] = useState({ present: 0, late: 0, absent: 0 });
   const [loading, setLoading] = useState(true);
@@ -48,11 +58,11 @@ const ReportScreen = () => {
 
   // Handle calendar day press
   const handleDayPress = (day: DateData) => {
-    const event: IEvent | undefined = events.find(
+    const eventsForTheDay = events.filter(
       (e: IEvent) => new Date(e.startTime).toISOString().split('T')[0] === day.dateString
-    ); // ✅ Ensure correct type
-    if (event) {
-      setSelectedEvent(event);
+    ); // Get all events for the selected day
+    if (eventsForTheDay.length > 0) {
+      setSelectedEvents(eventsForTheDay); // Store multiple events
       setModalVisible(true);
       Animated.timing(modalAnim, {
         toValue: 1,
@@ -66,7 +76,7 @@ const ReportScreen = () => {
   return (
     <View style={styles.container}>
       {/* Page Title */}
-      <Text style={styles.title}>📊 Attendance Report</Text>
+      <Text style={styles.title}>Attendance Report</Text>
 
       {/* Pull-to-refresh wrapper */}
       <ScrollView 
@@ -110,36 +120,154 @@ const ReportScreen = () => {
       <Modal visible={modalVisible} transparent animationType="none">
         <View style={styles.modalContainer}>
           <Animated.View style={[styles.modalContent, { transform: [{ scale: modalAnim }] }]}> 
-            <Text style={styles.modalText}>Event: {selectedEvent?.name}</Text>
-            <Text style={styles.modalText}>Description: {selectedEvent?.description}</Text>
-            <TouchableOpacity onPress={() => {
-              Animated.timing(modalAnim, {
-                toValue: 0,
-                duration: 200,
-                useNativeDriver: true,
-              }).start(() => setModalVisible(false));
-            }} style={styles.closeButton}>
+            <Text style={styles.modalText}>
+              Events on {selectedEvents[0] ? new Date(selectedEvents[0].startTime).toISOString().split('T')[0] : ""}
+            </Text>
+            
+            {/* ✅ Wrap in ScrollView for scrolling */}
+            <ScrollView 
+              style={{ maxHeight: maxEventHeight, width: "100%" }} 
+              keyboardShouldPersistTaps="handled"
+            >
+              <View style={styles.eventContainer}>
+                {selectedEvents.map((event, index) => (
+                  <View key={index} style={styles.eventBox}>
+                    <Text style={styles.eventName}>Event: {event.name}</Text>
+                    <Text style={styles.eventDescription}>Description: {event.description}</Text>
+                    <Text style={styles.eventTime}>Time: {new Date(event.startTime).toLocaleTimeString()}</Text>
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
+
+            <TouchableOpacity 
+              onPress={() => {
+                Animated.timing(modalAnim, {
+                  toValue: 0,
+                  duration: 200,
+                  useNativeDriver: true,
+                }).start(() => setModalVisible(false));
+              }} 
+              style={styles.closeButton}
+            >
               <Text style={styles.closeText}>Close</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
       </Modal>
+
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
-  title: { fontSize: 22, fontWeight: "bold", textAlign: "center", marginBottom: 16, color: "#333" },
-  statsContainer: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", marginBottom: 20 },
-  box: { width: "48%", padding: 16, borderRadius: 12, elevation: 3, marginBottom: 10 },
-  label: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  value: { color: "#fff", fontSize: 20, fontWeight: "900", marginTop: 4 },
-  modalContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0, 0, 0, 0.5)" },
-  modalContent: { backgroundColor: "#fff", padding: 20, borderRadius: 15, width: "80%", alignItems: "center", shadowColor: "#000", shadowOpacity: 0.3, shadowOffset: { width: 0, height: 5 }, shadowRadius: 10 },
-  modalText: { fontSize: 18, fontWeight: "bold", marginBottom: 10, textAlign: "center" },
-  closeButton: { marginTop: 10, padding: 10, backgroundColor: "#3b82f6", borderRadius: 8 },
-  closeText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  container: {
+    flex: 1,
+    padding: smartScale(15),
+    backgroundColor: Colors.white,
+  },
+  eventContainer: {
+    width: "100%",
+    padding: smartScale(10),
+    overflow: 'scroll',  // Enables scrolling if content exceeds maxHeight
+  },
+  eventBox: {
+    padding: smartScale(15),
+    marginBottom: smartScale(15),
+    backgroundColor: Colors.white_bb,  // Light gray background for event box
+    borderRadius: smartScale(10),
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: smartScale(5),
+    borderWidth: 1,
+    borderColor: "#e5e7eb",  // Light border color
+  },
+  eventName: {
+    fontSize: fontNormalize(18),
+    fontWeight: "bold",
+    color: Colors.black,
+    marginBottom: smartScale(5),
+  },
+  eventDescription: {
+    fontSize: fontNormalize(16),
+    color: Colors.bg,
+    marginBottom: smartScale(5),
+  },
+  eventTime: {
+    fontSize: fontNormalize(14),
+    color: Colors.primaryColor,
+    marginBottom: smartScale(5),
+  },
+  title: {
+    fontSize: fontNormalize(22),
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: smartScale(15),
+  },
+  statsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginBottom: smartScale(20),
+  },
+  box: {
+    width: "45%",
+    margin: smartScale(8),
+    padding: smartScale(15),
+    borderRadius: smartScale(20),
+    elevation: 0,
+    marginBottom: smartScale(15),
+  },
+  label: {
+    color: Colors.white,
+    fontSize: fontNormalize(16),
+    fontWeight: "bold",
+  },
+  value: {
+    color: Colors.white,
+    fontSize: 20,
+    fontWeight: "900",
+    marginTop: smartScale(5),
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: Colors.white,
+    padding: smartScale(30),
+    borderRadius: smartScale(20),
+    width: "80%",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: smartScale(10),
+  },
+  modalText: {
+    fontSize: fontNormalize(18),
+    fontWeight: "bold",
+    marginBottom: smartScale(10),
+    textAlign: "center",
+  },
+  eventItem: {
+    marginBottom: smartScale(15),
+  },
+  closeButton: {
+    marginTop: smartScale(10),
+    paddingHorizontal: smartScale(20),
+    paddingVertical: smartScale(10),
+    backgroundColor: "#3b82f6",
+    borderRadius: smartScale(20),
+  },
+  closeText: {
+    color: Colors.white,
+    fontSize: fontNormalize(16),
+    fontWeight: "bold",
+  },
 });
 
 export default ReportScreen;

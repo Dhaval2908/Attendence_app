@@ -36,6 +36,8 @@ const FaceAttendance = () => {
   const handleCapture = async (imagePath: string) => {
     try {
         const { lat, lng }: any = await getLocation();
+        // const lat: any = 42.317314
+        // const lng: any = -83.038551
         console.log("🚀 Capturing Attendance with Location");
 
         console.log("lati:", lat);

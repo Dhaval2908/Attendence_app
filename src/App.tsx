@@ -29,7 +29,7 @@ const AppNavigator = () => {
   useEffect(() => {
     setTimeout(() => {
       setIsLoading(false);
-    }, 5000); // 3 seconds
+    }, 3500); // 4 seconds
   }, []);
 
   // Show SplashScreen

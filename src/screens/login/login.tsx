@@ -78,6 +78,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         }
       } else if (error.request) {
         // No response received (network issues)
+        console.log(error.request)
         errorMessage = "Network error. Please check your internet connection.";
       } else {
         // Other unexpected issues

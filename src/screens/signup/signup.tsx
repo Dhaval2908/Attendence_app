@@ -230,7 +230,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
         <TouchableWithoutFeedback onPress={hideModal}>
           <View style={styles.modalOverlay}>
             <Animated.View style={[styles.modalContainer, { opacity: fadeAnim }]}>
-              <Text style={styles.modalTitle}>Oops!</Text>
+              <Text style={styles.modalTitle}>{modalType === "success" ? "Success!" : "Oops!"}</Text>
               <Text style={styles.modalMessage}>{modalMessage}</Text>
               <TouchableOpacity onPress={hideModal} style={styles.modalButton}>
                 <Text style={styles.modalButtonText}>Okay</Text>

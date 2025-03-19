@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   },
   box: {
     width: "45%",
-    margin: smartScale(8),
+    margin: smartScale(5),
     padding: smartScale(15),
     borderRadius: smartScale(20),
     elevation: 0,

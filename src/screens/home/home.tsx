@@ -10,7 +10,7 @@ import { useEvents } from '../../context/EventsContext';
 
 const HomeScreen = () => {
   const navigation = useNavigation(); 
-  const { events, refreshEvents } = useEvents();  // ✅ Now using events from context
+  const { events, refreshEvents ,loading} = useEvents();  // ✅ Now using events from context
   const [refreshing, setRefreshing] = useState(false);
 
   const faceAttendance = (eventId: string) => {
@@ -23,10 +23,18 @@ const HomeScreen = () => {
       <Map />
       <Text style={styles.header}>Events</Text>
 
-      {events.length > 0 ? (
-        <Events events={events} onRefresh={refreshEvents} refreshing={refreshing} onClockIn={faceAttendance} loading={false} />
-      ) : (
+     {loading ? (
         <ActivityIndicator size="large" color="#3b82f6" />
+      ) : events.length > 0 ? (
+        <Events 
+          events={events} 
+          onRefresh={refreshEvents} 
+          refreshing={refreshing} 
+          onClockIn={faceAttendance} 
+          loading={loading}  // ✅ Corrected to dynamic loading
+        />
+      ) : (
+        <Text>No events found</Text>
       )}
     </View>
   );

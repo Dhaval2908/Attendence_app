@@ -48,8 +48,9 @@ const Events: React.FC<EventsProps> = ({ events, loading, onRefresh, refreshing,
   const renderEventItem = ({ item }: { item: IEvent }) => {
     const start = moment(item.startTime).format('MMM DD, YYYY • hh:mm A');
     const end = moment(item.endTime).format('hh:mm A');
-    const category = categorizeEvents(item); // Get the category (Upcoming, Ongoing, or Past)
-
+    const category = categorizeEvents(item);
+    console.log(item.hasClockedIn)
+  
     return (
       <View style={styles.eventItem}>
         <View style={styles.eventDetails}>
@@ -60,7 +61,9 @@ const Events: React.FC<EventsProps> = ({ events, loading, onRefresh, refreshing,
           <Text style={styles.eventDescription}>{item.description}</Text>
           <Text style={styles.eventDate}>{`${start} - ${end}`}</Text>
         </View>
-        {category === 'Ongoing' && (
+  
+        {/* ✅ Show 'Clock In' only if 'hasClockedIn' is false */}
+        {category === 'Ongoing' && item.attendanceStatus === "pending"  && (
           <TouchableOpacity style={styles.button} onPress={() => onClockIn(item._id)}>
             <Text style={styles.buttonText}>Clock In</Text>
           </TouchableOpacity>
@@ -68,6 +71,7 @@ const Events: React.FC<EventsProps> = ({ events, loading, onRefresh, refreshing,
       </View>
     );
   };
+  
 
   // Determine which events to display based on selectedCategory
   const eventsToDisplay = selectedCategory === 'Upcoming' ? upcomingEvents : selectedCategory === 'Ongoing' ? ongoingEvents : pastEvents;

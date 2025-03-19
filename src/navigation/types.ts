@@ -23,6 +23,7 @@ export interface IEvent {
   startTime: Date | string | number;
   endTime: Date | string | number;
   isClockInAllowed?: boolean;
+  hasClockedIn?: boolean;
 }
 // Add these type extensions for navigation
 declare global {

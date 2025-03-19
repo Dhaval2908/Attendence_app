@@ -8,6 +8,8 @@ import CameraComponent from "./components/CameraComponent";
 import { fontSizeLarge, fontSizeMedium, fontSizeSmall, smartScale } from "../../theme/constants/normalize";
 import { Colors } from "../../theme/colors";
 import LottieView from "lottie-react-native";
+import { pingServer, retryRequest } from "../../utils/apiutils";
+import { useFocusEffect } from "@react-navigation/native";
 
 const FaceRegistration = () => {
   const navigation = useNavigation();
@@ -20,9 +22,11 @@ const FaceRegistration = () => {
   const [modalType, setModalType] = useState("success");
   const fadeAnim = useState(new Animated.Value(0))[0];
 
-  useEffect(() => {
-    checkFaceRegistration();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      checkFaceRegistration();  // ✅ Runs every time the screen is focused
+    }, [])
+  );
   
   useEffect(() => {
     if (isSuccess) {
@@ -65,15 +69,16 @@ const FaceRegistration = () => {
 
   const handleCapture = async (imagePath: string) => {
     setIsUploading(true); 
-
+    const serverActive = await pingServer();
     const formData = new FormData();
     formData.append("image", { uri: imagePath, type: "image/jpeg", name: "face.jpg" });
 
     try {
-      const response = await axios.post(`${Config.FLASK_API_URL}/register`, formData, {
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
-        timeout: 10000
-      });
+      const response = await retryRequest(() => 
+        axios.post(`${Config.FLASK_API_URL}/register`, formData, {
+            headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+        })
+    );
 
       console.log("Upload success:", response.data);
 
@@ -81,9 +86,9 @@ const FaceRegistration = () => {
         setIsSuccess(true); // Show success animation
         setIsUploading(false);
         showModal("Face registered successfully!", "success");
+        checkFaceRegistration(); // Recheck registration status
       }
 
-      checkFaceRegistration(); // Recheck registration status
     } catch (error) {
       setIsUploading(false);
       console.error("Upload Error:", error);

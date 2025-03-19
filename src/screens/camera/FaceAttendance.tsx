@@ -9,6 +9,9 @@ import Geolocation from "@react-native-community/geolocation";
 import { smartScale, fontSizeMedium, fontSizeSmall, fontSizeLarge } from "../../theme/constants/normalize";
 import { Colors } from "../../theme/colors";
 import LottieView from "lottie-react-native";
+import { useEvents } from "../../context/EventsContext"; 
+import { pingServer, retryRequest } from "../../utils/apiutils";
+
 
 
 type RouteParams = {
@@ -22,7 +25,8 @@ const FaceAttendance = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const navigation = useNavigation();
-
+  
+  const { refreshEvents } = useEvents(); 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalType, setModalType] = useState("success");
@@ -73,6 +77,7 @@ const FaceAttendance = () => {
   const handleCapture = async (imagePath: string) => {
     try {
       setIsUploading(true);
+      const serverActive = await pingServer();
         // const { lat, lng }: any = await getLocation();
         const lat: any = 42.317314
         const lng: any = -83.038551
@@ -93,10 +98,11 @@ const FaceAttendance = () => {
 
         console.log("📤 Attendance FormData:", formData);
 
-        const response = await axios.post(`${Config.FLASK_API_URL}/mark_attendance`, formData, {
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
-          // timeout: 10000,
-        });
+        const response = await retryRequest(() => 
+          axios.post(`${Config.FLASK_API_URL}/mark_attendance`, formData, {
+              headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+          })
+      );
 
         console.log("✅ Attendance Response:", response.data);
 
@@ -104,6 +110,7 @@ const FaceAttendance = () => {
           setIsSuccess(true); // Show success animation
           setIsUploading(false);
           showModal("Attendance marked successfully!", "success");
+          await refreshEvents();
             // Alert.alert("Success", "Attendance Marked!");
         } 
     } catch (error: any) {

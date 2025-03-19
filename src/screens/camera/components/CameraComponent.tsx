@@ -35,7 +35,7 @@ const CameraComponent: React.FC<CameraComponentProps> = ({ onCapture }) => {
     if (!isFocused || !isCameraReady) return; 
 
     try {
-        await new Promise((resolve) => setTimeout(resolve, 500)); // ✅ Added delay for camera readiness
+        await new Promise((resolve) => setTimeout(resolve, 200)); // ✅ Added delay for camera readiness
 
         if (camera.current) {
             setLoading(true);
@@ -45,7 +45,8 @@ const CameraComponent: React.FC<CameraComponentProps> = ({ onCapture }) => {
 
             const faces = await vision.detect(imagePath);
             if (faces.length > 0) {
-                onCapture(imagePath);
+              console.log(imagePath)
+              onCapture(imagePath);
             } else {
                 Alert.alert("No Face Detected", "Please try again.");
             }
@@ -67,7 +68,7 @@ const CameraComponent: React.FC<CameraComponentProps> = ({ onCapture }) => {
         device={device}
         isActive={isFocused}
         photo={true}
-        onInitialized={handleCameraReady} // ✅ Ensures camera is ready
+        onInitialized={handleCameraReady} 
       />
       <View style={styles.overlay}>
         {loading ? (

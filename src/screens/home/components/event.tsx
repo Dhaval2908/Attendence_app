@@ -12,12 +12,13 @@ interface EventsProps {
   onRefresh: () => void;
   refreshing: boolean;
   onClockIn: (eventId: string) => void;
+  selectedCategory: 'Upcoming' | 'Ongoing' | 'Past';
 }
 
-const Events: React.FC<EventsProps> = ({ events, loading, onRefresh, refreshing, onClockIn }) => {
+const Events: React.FC<EventsProps> = ({ events, loading, onRefresh, refreshing, onClockIn, selectedCategory }) => {
   
   const currentTime = moment(); // Get current time
-  const [selectedCategory, setSelectedCategory] = useState<'Upcoming' | 'Ongoing' | 'Past'>('Upcoming'); // Initial category
+  
 
   // Function to categorize events
   const categorizeEvents = (event: IEvent) => {
@@ -40,30 +41,28 @@ const Events: React.FC<EventsProps> = ({ events, loading, onRefresh, refreshing,
   };
 
   // Filter events based on category
-  const upcomingEvents = events.filter((event) => categorizeEvents(event) === 'Upcoming');
-  const ongoingEvents = events.filter((event) => categorizeEvents(event) === 'Ongoing');
-  const pastEvents = events.filter((event) => categorizeEvents(event) === 'Past');
+   const eventsToDisplay = events.filter((event) => categorizeEvents(event) === selectedCategory);
 
   // Render event item for FlatList
   const renderEventItem = ({ item }: { item: IEvent }) => {
     const start = moment(item.startTime).format('MMM DD, YYYY • hh:mm A');
     const end = moment(item.endTime).format('hh:mm A');
-    const category = categorizeEvents(item);
-    console.log(item.hasClockedIn)
+    // const category = categorizeEvents(item);
+    // console.log(item.hasClockedIn)
   
     return (
       <View style={styles.eventItem}>
         <View style={styles.eventDetails}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Ionicons name="calendar-outline" size={20} color={Colors.primaryColor} />
-            <Text style={styles.eventTitle}>{item.name}</Text>
+            <Text style={styles.eventTitle}>{item.name}</Text>  
           </View>
           <Text style={styles.eventDescription}>{item.description}</Text>
           <Text style={styles.eventDate}>{`${start} - ${end}`}</Text>
         </View>
   
         {/* ✅ Show 'Clock In' only if 'hasClockedIn' is false */}
-        {category === 'Ongoing' && item.attendanceStatus === "pending"  && (
+        {selectedCategory === 'Ongoing' && item.attendanceStatus === "pending" && (
           <TouchableOpacity style={styles.button} onPress={() => onClockIn(item._id)}>
             <Text style={styles.buttonText}>Clock In</Text>
           </TouchableOpacity>
@@ -74,46 +73,10 @@ const Events: React.FC<EventsProps> = ({ events, loading, onRefresh, refreshing,
   
 
   // Determine which events to display based on selectedCategory
-  const eventsToDisplay = selectedCategory === 'Upcoming' ? upcomingEvents : selectedCategory === 'Ongoing' ? ongoingEvents : pastEvents;
+  
 
   return (
     <View style={styles.container}>
-      {/* Category buttons */}
-      <View style={styles.categoryButtons}>
-        <TouchableOpacity
-          style={[styles.categoryButton, selectedCategory === 'Upcoming' && styles.selectedCategoryButton]}
-          onPress={() => setSelectedCategory('Upcoming')}
-        >
-          <Text
-            style={[styles.categoryButtonText, selectedCategory === 'Upcoming' && styles.selectedCategoryButtonText]}
-          >
-            Upcoming
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.categoryButton, selectedCategory === 'Ongoing' && styles.selectedCategoryButton]}
-          onPress={() => setSelectedCategory('Ongoing')}
-        >
-          <Text
-            style={[styles.categoryButtonText, selectedCategory === 'Ongoing' && styles.selectedCategoryButtonText]}
-          >
-            Ongoing
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.categoryButton, selectedCategory === 'Past' && styles.selectedCategoryButton]}
-          onPress={() => setSelectedCategory('Past')}
-        >
-          <Text
-            style={[styles.categoryButtonText, selectedCategory === 'Past' && styles.selectedCategoryButtonText]}
-          >
-            Past
-          </Text>
-        </TouchableOpacity>
-      </View>
-
       {loading ? (
         <ActivityIndicator size="large" color={Colors.primaryColor} />
       ) : (
@@ -136,7 +99,7 @@ const Events: React.FC<EventsProps> = ({ events, loading, onRefresh, refreshing,
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: smartScale(20) },
+  container: { flex: 1, paddingHorizontal: smartScale(20),backgroundColor:Colors.white },
   categoryButtons: {
     marginVertical: smartScale(5),
     flexDirection: 'row',

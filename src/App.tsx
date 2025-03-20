@@ -9,13 +9,14 @@ import { AuthContext, AuthProvider } from "./context/AuthContext";
 import FaceAttendance from "./screens/camera/FaceAttendance";
 import SplashScreen from "./screens/splash/splash";
 import { EventsProvider } from "./context/EventsContext";
+import { LocationProvider } from "./context/LocationContext";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
- const { user,token } = useContext(AuthContext)!;
- console.log(user )
- console.log(token)
+  const { user, token } = useContext(AuthContext)!;
+  console.log(user)
+  console.log(token)
   // if (user === null && token === null) {
   //   // Show loading spinner while checking authentication status
   //   return (
@@ -59,9 +60,9 @@ const AppNavigator = () => {
           </>
         ) : (
           <>
-          
-          <Stack.Screen name="Nav" component={BottomTabNavigator} />
-          <Stack.Screen name="FaceAttendance" component={FaceAttendance} />
+
+            <Stack.Screen name="Nav" component={BottomTabNavigator} />
+            <Stack.Screen name="FaceAttendance" component={FaceAttendance} />
           </>
         )}
       </Stack.Navigator>
@@ -71,11 +72,13 @@ const AppNavigator = () => {
 
 export default function App() {
   return (
-    
+
     <AuthProvider>
-      <EventsProvider>
-      <AppNavigator />
-    </EventsProvider>
+      <LocationProvider>
+        <EventsProvider>
+          <AppNavigator />
+        </EventsProvider>
+      </LocationProvider>
     </AuthProvider>
   );
 }

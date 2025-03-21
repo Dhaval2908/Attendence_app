@@ -6,18 +6,14 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Alert,
   ActivityIndicator,
-  Animated,
-  TouchableWithoutFeedback,
-  Modal,
-  Easing,
 } from "react-native";
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { StackScreenProps } from "@react-navigation/stack";
 import Config from "react-native-config";
 import { Colors } from "../../theme/colors";
 import { fontSizeMedium, fontSizeSmall, headerHeight, headerPadding, headerWidth, smartScale } from "../../theme/constants/normalize";
+import { useFeedbackModal } from "../../utils/useFeedbackModal";
 
 type RootStackParamList = {
   Login: undefined;
@@ -37,32 +33,9 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
   const [isPasswordVisible1, setIsPasswordVisible1] = useState(false);
   const [isPasswordVisible2, setIsPasswordVisible2] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
-  const [modalType, setModalType] = useState("success");
-  const fadeAnim = useState(new Animated.Value(0))[0];
-
-  const showModal = (message: string, type: string) => {
-    setModalMessage(message);
-    setModalType(type);
-    setModalVisible(true);
-    fadeIn();
-  };
-
-  const hideModal = () => {
-    setModalVisible(false);
-  };
-
-  const fadeIn = () => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 300,
-      easing: Easing.ease,
-      useNativeDriver: true,
-    }).start();
-  };
-
-
+  // Modal state
+  const { showModal, ModalComponent } = useFeedbackModal()
+    
   // Email domain validation function
   const isValidEmailDomain = (email: string) => {
     const allowedDomains = ["uwindsor.ca"]; // List of allowed domains
@@ -225,20 +198,7 @@ const SignUpScreen: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Custom Error Modal */}
-      <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={hideModal}>
-        <TouchableWithoutFeedback onPress={hideModal}>
-          <View style={styles.modalOverlay}>
-            <Animated.View style={[styles.modalContainer, { opacity: fadeAnim }]}>
-              <Text style={styles.modalTitle}>{modalType === "success" ? "Success!" : "Oops!"}</Text>
-              <Text style={styles.modalMessage}>{modalMessage}</Text>
-              <TouchableOpacity onPress={hideModal} style={styles.modalButton}>
-                <Text style={styles.modalButtonText}>Okay</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+      {ModalComponent}
     </View>
   );
 };
@@ -338,42 +298,5 @@ const styles = StyleSheet.create({
     fontSize: fontSizeSmall,
     color: Colors.primaryColor,
     
-  },
-  // Modal Styles
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContainer: {
-    backgroundColor: Colors.white,
-    width: smartScale(300),
-    borderRadius: smartScale(15),
-    padding: smartScale(20),
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  modalTitle: {
-    fontSize: fontSizeMedium,
-    fontWeight: "bold",
-    color: Colors.primaryColor,
-    marginBottom: smartScale(10),
-  },
-  modalMessage: {
-    fontSize: fontSizeSmall,
-    color: Colors.bg,
-    marginBottom: smartScale(20),
-    textAlign: "center",
-  },
-  modalButton: {
-    backgroundColor: Colors.primaryColor,
-    paddingVertical: smartScale(10),
-    paddingHorizontal: smartScale(20),
-    borderRadius: smartScale(25),
-  },
-  modalButtonText: {
-    color: Colors.white,
-    fontSize: fontSizeMedium,
   },
 });

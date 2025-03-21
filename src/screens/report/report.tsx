@@ -8,7 +8,7 @@ import { Calendar, DateData } from "react-native-calendars";
 import { AuthContext } from "../../context/AuthContext"; // Get token from context
 import { EventsContext } from "../../context/EventsContext"; // Use event data
 import Config from "react-native-config"; // For backend URL
-import { IEvent } from "../../navigation/types";  // ✅ Use IEvent
+import { IEvent } from "../../navigation/types";  //   Use IEvent
 import { fontNormalize, smartScale } from "../../theme/constants/normalize";
 import { Colors } from "../../theme/colors";
 
@@ -26,7 +26,7 @@ const ReportScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [attendanceStats, setAttendanceStats] = useState({ present: 0, late: 0, absent: 0 });
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false); // ✅ Track refresh state
+  const [refreshing, setRefreshing] = useState(false); //   Track refresh state
   const modalAnim = useState(new Animated.Value(0))[0];
 
   // Fetch attendance statistics
@@ -124,7 +124,7 @@ const ReportScreen = () => {
               Events on {selectedEvents[0] ? new Date(selectedEvents[0].startTime).toISOString().split('T')[0] : ""}
             </Text>
             
-            {/* ✅ Wrap in ScrollView for scrolling */}
+            {/*   Wrap in ScrollView for scrolling */}
             <ScrollView 
               style={{ maxHeight: maxEventHeight, width: "100%" }} 
               keyboardShouldPersistTaps="handled"
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     marginBottom: smartScale(15),
   },
   statsContainer: {
-    flexDirection: "row",
+    flexDirection: "row", 
     flexWrap: "wrap",
     justifyContent: "space-between",
     marginBottom: smartScale(20),

@@ -61,7 +61,7 @@ const Events: React.FC<EventsProps> = ({ events, loading, onRefresh, refreshing,
           <Text style={styles.eventDate}>{`${start} - ${end}`}</Text>
         </View>
   
-        {/* ✅ Show 'Clock In' only if 'hasClockedIn' is false */}
+        {/*   Show 'Clock In' only if 'hasClockedIn' is false */}
         {selectedCategory === 'Ongoing' && item.attendanceStatus === "pending" && (
           <TouchableOpacity style={styles.button} onPress={() => onClockIn(item._id)}>
             <Text style={styles.buttonText}>Clock In</Text>

@@ -1,8 +1,7 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, RefreshControl } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Text, StyleSheet, ActivityIndicator, FlatList, RefreshControl } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import { Colors } from '../../theme/colors';
-import { AuthContext } from '../../context/AuthContext';
 import Events from './components/event';
 import Map from './components/map';
 import { fontNormalize, fontSizeSmall, smartScale } from '../../theme/constants/normalize';
@@ -80,7 +79,7 @@ const HomeScreen = () => {
             onSelectCategory={setSelectedCategory}  
           />
 
-          {/* ✅ Only one spinner during refresh */}
+          {/*   Only one spinner during refresh */}
           {(refreshing || eventsLoading) && (
             <ActivityIndicator size="large" color="#3b82f6" />
           )}
@@ -92,8 +91,8 @@ const HomeScreen = () => {
           onRefresh={refreshEvents} 
           onClockIn={faceAttendance} 
           selectedCategory={selectedCategory}
-          loading={false}    // ✅ No spinner inside `<Events />`
-          refreshing={false} // ✅ No spinner inside `<Events />`
+          loading={false} 
+          refreshing={false}
         />
       )}
       refreshControl={

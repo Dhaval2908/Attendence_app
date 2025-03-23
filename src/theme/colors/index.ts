@@ -34,5 +34,6 @@ export const Colors = {
     greenCheck: '#00AC62',
     redCross: '#D50000',
     receiverChat: '#CFF3FF',
-    senderChat: '#F8B8E1'
+    senderChat: '#F8B8E1',
+    lightGray: '#D3D3D3',
 }

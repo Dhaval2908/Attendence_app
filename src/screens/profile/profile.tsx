@@ -6,7 +6,9 @@ import {
   ScrollView, 
   ActivityIndicator, 
   TouchableOpacity,
-  Alert 
+  TextInput,
+  Image,
+  Alert
 } from 'react-native';
 import { fontNormalize, fontSizeLarge, smartScale } from '../../theme/constants/normalize';
 import Ionicons from '@react-native-vector-icons/ionicons';
@@ -17,14 +19,15 @@ import axios from 'axios';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigation/types';
 import { useFeedbackModal } from '../../utils/useFeedbackModal';
+import * as ImagePicker from 'react-native-image-picker';
 
 interface Profile {
   fullName: string;
   studentId: string;
-  name: string;
   email: string;
   phoneNumber: string;
   country: string;
+  profileImage: string;
 }
 
 const ProfileScreen = () => {
@@ -33,8 +36,16 @@ const ProfileScreen = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  // Modal state
+  const [editing, setEditing] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [country, setCountry] = useState<string>('');
+  const [profileImage, setProfileImage] = useState<string | undefined>('');
+  
+  
+
+
   const { showModal, ModalComponent } = useFeedbackModal();
+
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -59,23 +70,68 @@ const ProfileScreen = () => {
     const fetchProfile = async () => {
       try {
         const response = await axios.get(`${Config.BASE_URL}/api/profile/`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         });
-        setProfile(response.data);
+        const userData: Profile = response.data;
+  
+        setProfile(userData);
+        setPhoneNumber(userData.phoneNumber ?? '');  
+        setCountry(userData.country ?? '');  
+        setProfileImage(userData.profileImage ?? '');  
+  
       } catch (error) {
         console.error('Error fetching profile:', error);
       } finally {
         setLoading(false);
       }
     };
-
-    if (token) {
-      fetchProfile();
-    }
+  
+    if (token) fetchProfile();
   }, [token]);
+  
+  
+  
+
+  const handleEditToggle = () => {
+    setEditing(!editing);
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      const response = await axios.put(`${Config.BASE_URL}/api/profile/update`, {
+        phoneNumber,
+        country,
+        profileImage,
+      }, {
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+      setProfile(response.data);
+      setEditing(false);
+      showModal("Profile updated successfully!", "success");
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      showModal("Failed to update profile.", "error");
+    }
+  };
+
+  const handleImagePick = () => {
+    if (!editing) return;
+    
+    Alert.alert("Profile Picture", "Choose an option", [
+      { text: "Remove Photo", onPress: () => setProfileImage('') },
+      { text: "Add / Change Photo", onPress: () => openImagePicker() },
+      { text: "Cancel", style: "cancel" }
+    ]);
+  };
+
+  const openImagePicker = () => {
+    ImagePicker.launchImageLibrary({ mediaType: 'photo' }, (response) => {
+      if (response.assets && response.assets.length > 0) {
+        console.log(response)
+        setProfileImage(response.assets[0].uri);
+      }
+    });
+  };
 
   if (loading) {
     return <ActivityIndicator size="large" color={Colors.primaryColor} style={styles.loader} />;
@@ -83,18 +139,33 @@ const ProfileScreen = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <Text style={styles.topHeader}>Profile</Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.topHeader}>Profile</Text>
+        <TouchableOpacity onPress={handleEditToggle} style={styles.editButton}>
+          <Ionicons name={editing ? "close-outline" : "create-outline"} size={smartScale(24)} color={Colors.primaryColor} />
+        </TouchableOpacity>
+      </View>
       <View style={styles.profileHeader}>
-        <Ionicons name="person-circle-outline" size={smartScale(100)} color={Colors.primaryColor} />
-        <Text style={styles.profileName}>{profile?.fullName || 'Guest'}</Text>
+        <TouchableOpacity onPress={handleImagePick} style={styles.imageContainer}>
+          {profileImage ? (
+            <Image source={{ uri: profileImage }} style={styles.profileImage} />
+          ) : (
+            <Ionicons name="person-circle-outline" size={smartScale(100)} color={Colors.primaryColor} />
+          )}
+        </TouchableOpacity>
       </View>
       <View style={styles.sectionContainer}>
         <ProfileInfo label="Student ID" value={profile?.studentId || 'N/A'} />
         <ProfileInfo label="Full Name" value={profile?.fullName || 'Not provided'} />
         <ProfileInfo label="Email" value={profile?.email || 'No email'} />
-        <ProfileInfo label="Phone Number" value={profile?.phoneNumber || 'Not provided'} />
-        <ProfileInfo label="Country" value={profile?.country || 'Not specified'} />
+        <EditableField label="Phone Number" value={phoneNumber} setValue={setPhoneNumber} editing={editing} />
+        <EditableField label="Country" value={country} setValue={setCountry} editing={editing} />
       </View>
+      {editing && (
+        <TouchableOpacity style={styles.button} onPress={handleSaveProfile}>
+          <Text style={styles.buttonText}>Save</Text>
+        </TouchableOpacity>
+      )}
       <TouchableOpacity 
         style={styles.button} 
         onPress={handleLogout}
@@ -117,21 +188,78 @@ const ProfileScreen = () => {
   );
 };
 
-const ProfileInfo: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+const ProfileInfo = ({ label, value }: { label: string; value: string }) => (
   <View style={styles.infoContainer}>
     <Text style={styles.infoLabel}>{label}</Text>
     <Text style={styles.infoValue}>{value}</Text>
   </View>
 );
 
-// Keep your existing StyleSheet
+const EditableField = ({ label, value, setValue, editing }: { label: string; value: string; setValue: (val: string) => void; editing: boolean }) => (
+  <View style={styles.infoContainer}>
+    <Text style={styles.infoLabel}>{label}</Text>
+    {editing ? (
+      <TextInput value={value} onChangeText={setValue} placeholder={label} />
+    ) : (
+      <Text style={styles.infoValue}>{value || 'Not provided'}</Text>
+    )}
+  </View>
+);
 
 const styles = StyleSheet.create({
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: smartScale(15),
+  },  
+  editButton: {
+    padding: smartScale(10),
+    backgroundColor: Colors.lightGray,
+    borderRadius: smartScale(10),
+  },
+  
+  imageContainer: {
+    alignItems: 'center',
+    marginBottom: smartScale(20),
+  },
+  profileImage: {
+    width: smartScale(120),
+    height: smartScale(120),
+    borderRadius: smartScale(60),
+    borderWidth: 2,
+    borderColor: Colors.primaryColor,
+  },
   scrollContainer: {
     flexGrow: 1,
     backgroundColor: Colors.white,
     paddingBottom: smartScale(30),
   },
+  saveButton: {
+    backgroundColor: Colors.primaryColor,
+    padding: smartScale(12),
+    borderRadius: smartScale(10),
+    alignItems: 'center',
+    marginHorizontal: smartScale(20),
+    marginTop: smartScale(20),
+  },
+  button: {
+    flexDirection: "row",
+    alignSelf: "center",
+    justifyContent: 'center',
+    backgroundColor: Colors.secondaryColor,
+    borderRadius: smartScale(20),
+    marginTop: smartScale(20),
+    width: smartScale(110),
+    height: smartScale(50),
+  },
+  buttonText: {
+    color: Colors.bg,
+    alignSelf:'center',
+    fontSize: fontNormalize(16),
+    marginRight: smartScale(8),
+  },
+  
   loader: {
     flex: 1,
     justifyContent: 'center',
@@ -178,22 +306,7 @@ const styles = StyleSheet.create({
     fontSize: fontNormalize(16),
     fontWeight: '500',
   },
-  button: {
-    flexDirection: "row",
-    alignSelf: "center",
-    justifyContent: 'center',
-    backgroundColor: Colors.secondaryColor,
-    borderRadius: smartScale(20),
-    marginTop: smartScale(20),
-    width: smartScale(110),
-    height: smartScale(50),
-  },
-  buttonText: {
-    color: Colors.bg,
-    alignSelf:'center',
-    fontSize: fontNormalize(16),
-    marginRight: smartScale(8),
-  },
+  
   icon:{
     alignSelf:'center',
   },

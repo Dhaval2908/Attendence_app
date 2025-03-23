@@ -1,6 +1,8 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import LottieView from "lottie-react-native";
+import { smartScale } from "../../theme/constants/normalize";
+import { Colors } from "../../theme/colors";
 
 const SplashScreen = () => {
   return (
@@ -20,11 +22,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff", // Or any background color you want
+    backgroundColor: Colors.white, 
   },
   animation: {
-    width: 200,  // Adjust width and height to fit your design
-    height: 200,
+    width: smartScale(200),
+    height: smartScale(200),
   },
 });
 

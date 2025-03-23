@@ -1,7 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import Geolocation from '@react-native-community/geolocation';
-import { Animated, Easing } from 'react-native';
-import ModalComponent from '../utils/ModalComponent';
+import { useFeedbackModal } from '../utils/useFeedbackModal';
 interface Location {
     lat: number;
     lng: number;
@@ -37,28 +36,8 @@ const fetchAddress = async (lat: number, lng: number) => {
     const [address, setAddress] = useState<string>('Fetching location...');
     const [error, setError] = useState<string | null>(null);
   
-    const [modalVisible, setModalVisible] = useState<boolean>(false);
-    const [modalMessage, setModalMessage] = useState<string>('');
-    const [modalType, setModalType] = useState<'success' | 'error'>('success');
-    const fadeAnim = useState(new Animated.Value(0))[0];
-  
-    const showModal = (message: string, type: 'success' | 'error') => {
-      setModalMessage(message);
-      setModalType(type);
-      setModalVisible(true);
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        easing: Easing.ease,
-        useNativeDriver: true,
-      }).start();
-    };
-  
-    const hideModal = () => {
-      setModalVisible(false);
-      setLoading(true);
-      fetchLocation(); // Recheck location after modal closes
-    };
+    // Modal state
+    const { showModal, ModalComponent } = useFeedbackModal()
   
     const getLocation = async (): Promise<Location> => {
       return new Promise((resolve, reject) => {
@@ -104,6 +83,8 @@ const fetchAddress = async (lat: number, lng: number) => {
         setError(null); // Clear error on success
       } catch (error) {
         setError(typeof error === 'string' ? error : 'Unknown error occurred');
+        showModal("Unknown error occurred","error");
+
       } finally {
         setLoading(false);
       }
@@ -116,12 +97,7 @@ const fetchAddress = async (lat: number, lng: number) => {
     return (
         <LocationContext.Provider value={{ location, address, loading, error, fetchLocation }}>
           {children}
-          <ModalComponent
-            visible={modalVisible}
-            message={modalMessage}
-            type={modalType}
-            onClose={hideModal}
-          />
+          {ModalComponent}
         </LocationContext.Provider>
       );
     };

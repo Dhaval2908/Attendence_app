@@ -7,7 +7,7 @@ export const pingServer = async (maxRetries = 3, delay = 3000) => {
         try {
             console.log(`🌐 Attempt ${attempt} - Pinging Server...`);
             await axios.get(`${Config.FLASK_API_URL}/health`);
-            console.log("✅ Server Active!");
+            console.log("  Server Active!");
             return true; // Server active
         } catch (error) {
             console.error(`⚠️ Attempt ${attempt} failed.`);
@@ -25,7 +25,7 @@ export const retryRequest = async (apiCall, maxRetries = 3, delay = 3000) => {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
             const response = await apiCall();
-            return response; // ✅ Successful response, no need to retry
+            return response; //   Successful response, no need to retry
         } catch (error) {
             // ⚠️ Handle HTTP errors (400, 403, etc.)
             if (error.response) {

@@ -31,8 +31,8 @@ const ModalComponent: React.FC<ModalComponentProps> = ({ visible, message, type,
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <Animated.View style={[styles.modalContainer, { opacity: fadeAnim }]}>
-          <Text style={[styles.modalTitle, type === 'error' && styles.errorTitle]}>
-            {type === 'success' ? '✅ Success!' : '❌ Error'}
+          <Text style={[styles.modalTitle]}>
+            {type === 'success' ? 'Success!' : 'Oops!'}
           </Text>
           <Text style={styles.modalMessage}>{message}</Text>
 

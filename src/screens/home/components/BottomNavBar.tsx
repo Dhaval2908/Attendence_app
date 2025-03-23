@@ -3,12 +3,11 @@ import { useRoute, useNavigationState } from '@react-navigation/native';
 import HomeScreen from '../home';
 import ProfileScreen from '../../profile/profile';
 import ReportScreen from '../../report/report';
-import MoreScreen from '../../more/more';
 import { BottomTabParamList } from '../../../navigation/types';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from "@react-native-vector-icons/ionicons";
 import { Colors } from '../../../theme/colors';
-import { fontSizeContent, fontSizeExtraSmall, fontSizeSmall, headerWidth, smartScale } from '../../../theme/constants/normalize';
+import { fontSizeContent, smartScale } from '../../../theme/constants/normalize';
 import { Animated, StyleSheet, View, Dimensions } from 'react-native';
 import FaceRegistration from '../../camera/FaceRegistration';
 
@@ -24,7 +23,7 @@ const BottomTabNavigator = () => {
   const activeIndex = tabState?.routes[tabState.index]?.state?.index || tabState?.index || 0;
 
   useEffect(() => {
-    const numberOfTabs = 5; // Number of tabs in your navigator
+    const numberOfTabs = 4;
     const tabWidth = screenWidth / numberOfTabs;
     const indicatorWidth = smartScale(40);
     const offset = (tabWidth - indicatorWidth) / 2;
@@ -114,17 +113,6 @@ const BottomTabNavigator = () => {
             tabBarIcon: ({ color, size }) => (
               <View style={styles.iconContainer}>
                 <Ionicons name="camera" size={size} color={color} />
-              </View>
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="More"
-          component={MoreScreen}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <View style={styles.iconContainer}>
-                <Ionicons name="ellipsis-horizontal" size={size} color={color} />
               </View>
             ),
           }}

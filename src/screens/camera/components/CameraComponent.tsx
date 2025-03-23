@@ -1,8 +1,11 @@
 import React, { useRef, useState, useEffect } from "react";
-import { View, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import { View, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { Camera, useCameraDevices } from "react-native-vision-camera";
 import vision from "@react-native-ml-kit/face-detection";
 import { useIsFocused } from "@react-navigation/native";
+import { useFeedbackModal } from "../../../utils/useFeedbackModal";
+import { smartScale } from "../../../theme/constants/normalize";
+import { Colors } from "../../../theme/colors";
 
 interface CameraComponentProps {
   onCapture: (imagePath: string) => void;
@@ -15,19 +18,20 @@ const CameraComponent: React.FC<CameraComponentProps> = ({ onCapture }) => {
 
   const [loading, setLoading] = useState(false);
   const [isCameraReady, setIsCameraReady] = useState(false);
-  const [cooldown, setCooldown] = useState(false); // ✅ Added cooldown to prevent fast re-click
   const isFocused = useIsFocused();
+  const { showModal, ModalComponent } = useFeedbackModal()
+
 
   useEffect(() => {
     (async () => {
       const permission = await Camera.requestCameraPermission();
       if (permission !== "granted") {
-        Alert.alert("Permission Denied", "Camera access is required.");
+        showModal("Permission Denied, Camera access is required.","error");
       }
     })();
   }, []);
 
-  const handleCameraReady = () => setTimeout(() => setIsCameraReady(true), 500); // ✅ Added slight delay
+  const handleCameraReady = () => setTimeout(() => setIsCameraReady(true), 200);
 
   if (!device) return <View><ActivityIndicator size="large" color="white" /></View>;
 
@@ -35,7 +39,7 @@ const CameraComponent: React.FC<CameraComponentProps> = ({ onCapture }) => {
     if (!isFocused || !isCameraReady) return; 
 
     try {
-        await new Promise((resolve) => setTimeout(resolve, 200)); // ✅ Added delay for camera readiness
+        await new Promise((resolve) => setTimeout(resolve, 200));
 
         if (camera.current) {
             setLoading(true);
@@ -48,12 +52,12 @@ const CameraComponent: React.FC<CameraComponentProps> = ({ onCapture }) => {
               console.log(imagePath)
               onCapture(imagePath);
             } else {
-                Alert.alert("No Face Detected", "Please try again.");
+                showModal("No Face Detected. Please try again.", "error");
             }
         }
     } catch (error) {
         console.error("❌ Camera Error:", error);
-        Alert.alert("Error", "Something went wrong with the camera!");
+        showModal("Something went wrong with the camera!","error")
     } finally {
         setLoading(false);
     }
@@ -79,12 +83,13 @@ const CameraComponent: React.FC<CameraComponentProps> = ({ onCapture }) => {
           </TouchableOpacity>
         )}
       </View>
+      {ModalComponent}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#000" },
+  container: { flex: 1, backgroundColor: Colors.white },
   camera: { flex: 1 },
   overlay: {
     position: "absolute",
@@ -93,17 +98,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   captureButton: {
-    width: 80,
-    height: 80,
+    width: smartScale(80),
+    height: smartScale(80),
     borderRadius: 40,
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     alignItems: "center",
     justifyContent: "center",
   },
   innerCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: smartScale(60),
+    height: smartScale(60),
+    borderRadius: smartScale(30),
     backgroundColor: "white",
   },
 });

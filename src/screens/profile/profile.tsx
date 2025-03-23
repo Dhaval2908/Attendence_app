@@ -16,6 +16,7 @@ import { AuthContext } from '../../context/AuthContext';
 import axios from 'axios';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../navigation/types';
+import { useFeedbackModal } from '../../utils/useFeedbackModal';
 
 interface Profile {
   fullName: string;
@@ -32,6 +33,8 @@ const ProfileScreen = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  // Modal state
+  const { showModal, ModalComponent } = useFeedbackModal();
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -46,7 +49,7 @@ const ProfileScreen = () => {
       });
     } catch (error) {
       console.error('Logout failed:', error);
-      Alert.alert('Error', 'Failed to logout. Please try again.');
+      showModal("Failed to logout. Please try again.","error");
     } finally {
       setIsLoggingOut(false);
     }

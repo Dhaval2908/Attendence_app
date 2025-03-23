@@ -4,6 +4,7 @@ import { RootStackParamList } from '../navigation/types';
 import { NavigationProp } from '@react-navigation/native';
 import {jwtDecode }from "jwt-decode";
 import { Animated, Easing } from 'react-native';
+import { useFeedbackModal } from '../utils/useFeedbackModal';
 
 interface User {
   id: string;
@@ -31,6 +32,8 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  // Modal state
+  const { showModal, ModalComponent } = useFeedbackModal()
 //   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 useEffect(() => {
   const loadUserData = async () => {
@@ -68,26 +71,6 @@ useEffect(() => {
   loadUserData();
 }, []);
 
-const [modalVisible, setModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
-  const [modalType, setModalType] = useState("success");
-  const fadeAnim = useState(new Animated.Value(0))[0];
-  const showModal = (message: string, type: string) => {
-        setModalMessage(message);
-        setModalType(type);
-        setModalVisible(true);
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          easing: Easing.ease,
-          useNativeDriver: true,
-        }).start();
-      };
-    
-      const hideModal = () => {
-        setModalVisible(false);
-      };
-    
 const login = async (data: { token: string; User: User }) => {
   try {
       const decodedToken: DecodedToken = jwtDecode(data.token);
@@ -105,7 +88,7 @@ const login = async (data: { token: string; User: User }) => {
       await AsyncStorage.setItem('token', data.token);
   } catch (error) {
       console.error("❌ Error decoding token during login:", error);
-      showModal( "Failed to process login token.","Error");
+      showModal( "Failed to login, please try again.","error");
   }
 };
 
@@ -120,7 +103,6 @@ const login = async (data: { token: string; User: User }) => {
         routes: [{ name: "Login" }],
       });
     } catch (error) {
-      console.error('Logout error:', error);
       throw error;
     }
   };
@@ -128,6 +110,7 @@ const login = async (data: { token: string; User: User }) => {
   return (
     <AuthContext.Provider value={{ user, token, login, logout }}>
       {children}
+      {ModalComponent}
     </AuthContext.Provider>
   );
 };

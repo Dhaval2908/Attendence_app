@@ -1,16 +1,17 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Alert, Animated, Easing, Modal, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import React, { useContext, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
 import axios from "axios";
 import Config from "react-native-config";
 import { AuthContext } from "../../context/AuthContext";
 import CameraComponent from "./components/CameraComponent";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Geolocation from "@react-native-community/geolocation";
-import { smartScale, fontSizeMedium, fontSizeSmall, fontSizeLarge } from "../../theme/constants/normalize";
+import { smartScale, fontSizeLarge } from "../../theme/constants/normalize";
 import { Colors } from "../../theme/colors";
 import LottieView from "lottie-react-native";
 import { useEvents } from "../../context/EventsContext"; 
 import { pingServer, retryRequest } from "../../utils/apiutils";
+import { useFeedbackModal } from "../../utils/useFeedbackModal";
 
 
 
@@ -25,38 +26,10 @@ const FaceAttendance = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const navigation = useNavigation();
-  
   const { refreshEvents } = useEvents(); 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
-  const [modalType, setModalType] = useState("success");
-  const fadeAnim = useState(new Animated.Value(0))[0];
 
-  useEffect(() => {
-      if (isSuccess) {
-        setTimeout(() => {
-          setIsSuccess(false);
-          navigation.goBack(); // Navigate back after success
-        }, 2000); // 2-second delay
-      }
-    }, [isSuccess]);
-
-  const showModal = (message: string, type: string) => {
-      setModalMessage(message);
-      setModalType(type);
-      setModalVisible(true);
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        easing: Easing.ease,
-        useNativeDriver: true,
-      }).start();
-    };
-  
-    const hideModal = () => {
-      setModalVisible(false);
-    };
-  
+  // Modal state
+  const { showModal, ModalComponent } = useFeedbackModal()
 
   const getLocation = async () => {
     return new Promise((resolve, reject) => {
@@ -78,9 +51,9 @@ const FaceAttendance = () => {
     try {
       setIsUploading(true);
       const serverActive = await pingServer();
-        // const { lat, lng }: any = await getLocation();
-        const lat: any = 42.317314
-        const lng: any = -83.038551
+        const { lat, lng }: any = await getLocation();
+        // const lat: any = 42.317314
+        // const lng: any = -83.038551
         console.log("🚀 Capturing Attendance with Location");
 
         console.log("lati:", lat);
@@ -104,14 +77,13 @@ const FaceAttendance = () => {
           })
       );
 
-        console.log("✅ Attendance Response:", response.data);
+        console.log("  Attendance Response:", response.data);
 
         if (response.status === 200 || response.status === 201) {
           setIsSuccess(true); // Show success animation
           setIsUploading(false);
           showModal("Attendance marked successfully!", "success");
           await refreshEvents();
-            // Alert.alert("Success", "Attendance Marked!");
         } 
     } catch (error: any) {
         setIsUploading(false);
@@ -158,7 +130,7 @@ const FaceAttendance = () => {
             loop
             style={styles.animation}
           />
-          <Text style={styles.processingText}>Verifying...</Text>
+          <Text style={styles.processingText}>Please wait...</Text>
         </View>
       );
     }
@@ -179,63 +151,15 @@ const FaceAttendance = () => {
   return (
     <View style={{ flex: 1 }}>
     <CameraComponent onCapture={handleCapture} />
-    <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={hideModal}>
-          <TouchableWithoutFeedback onPress={hideModal}>
-            <View style={styles.modalOverlay}>
-              <Animated.View style={[styles.modalContainer, { opacity: fadeAnim }]}>
-                <Text style={styles.modalTitle}>{modalType === "success" ? "Success!" : "Oops!"}</Text>
-                <Text style={styles.modalMessage}>{modalMessage}</Text>
-                <TouchableOpacity onPress={hideModal} style={styles.modalButton}>
-                  <Text style={styles.modalButtonText}>Okay</Text>
-                </TouchableOpacity>
-              </Animated.View>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
+    {/* model showing */}
+    {ModalComponent}
     </View>
 );
 };
 
 const styles = StyleSheet.create({
-  animationContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff" },
-  animation: { width: 200, height: 200 },
+  animationContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Colors.white },
+  animation: { width: smartScale(200), height: smartScale(200) },
   processingText: { color: Colors.bg, fontSize: fontSizeLarge, marginTop: smartScale(10) },
-  // Modal Styles
-    modalOverlay: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      backgroundColor: "rgba(0, 0, 0, 0.5)",
-    },
-    modalContainer: {
-      backgroundColor: Colors.white,
-      width: smartScale(300),
-      borderRadius: smartScale(15),
-      padding: smartScale(20),
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    modalTitle: {
-      fontSize: fontSizeMedium,
-      fontWeight: "bold",
-      color: Colors.primaryColor,
-      marginBottom: smartScale(10),
-    },
-    modalMessage: {
-      fontSize: fontSizeSmall,
-      color: Colors.bg,
-      marginBottom: smartScale(20),
-      textAlign: "center",
-    },
-    modalButton: {
-      backgroundColor: Colors.primaryColor,
-      paddingVertical: smartScale(10),
-      paddingHorizontal: smartScale(20),
-      borderRadius: smartScale(25),
-    },
-    modalButtonText: {
-      color: Colors.white,
-      fontSize: fontSizeMedium,
-    },
 })
 export default FaceAttendance;

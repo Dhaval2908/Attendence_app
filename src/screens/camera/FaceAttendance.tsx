@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import axios from "axios";
 import Config from "react-native-config";
@@ -46,7 +46,14 @@ const FaceAttendance = () => {
       );
     });
   };
-  
+  useEffect(() => {
+      if (isSuccess) {
+        setTimeout(() => {
+          setIsSuccess(false);
+          navigation.goBack(); // Navigate back after success
+        }, 2000); // 2-second delay
+      }
+    }, [isSuccess]);
   const handleCapture = async (imagePath: string) => {
     try {
       setIsUploading(true);
@@ -69,7 +76,7 @@ const FaceAttendance = () => {
             name: "attendance.jpg",
         });
 
-        console.log("📤 Attendance FormData:", formData);
+        console.log(" Attendance FormData:", formData);
 
         const response = await retryRequest(() => 
           axios.post(`${Config.FLASK_API_URL}/mark_attendance`, formData, {
@@ -84,6 +91,7 @@ const FaceAttendance = () => {
           setIsUploading(false);
           showModal("Attendance marked successfully!", "success");
           await refreshEvents();
+          
         } 
     } catch (error: any) {
         setIsUploading(false);
@@ -144,6 +152,7 @@ const FaceAttendance = () => {
             style={styles.animation}
           />
           <Text style={styles.processingText}>Done...</Text>
+        {/* {  navigation.goBack()} */}
         </View>
       );
     }

@@ -107,7 +107,7 @@ const BottomTabNavigator = () => {
           }}
         />
         <Tab.Screen
-          name="Face"
+          name="Register"
           component={FaceRegistration}
           options={{
             tabBarIcon: ({ color, size }) => (

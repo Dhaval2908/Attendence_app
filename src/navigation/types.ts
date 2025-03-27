@@ -3,14 +3,14 @@ export type BottomTabParamList = {
   Profile: { userId?: string };
   Report: { events: IEvent[] };
   More: undefined;
-  Face : undefined;
+  Register : undefined;
 };
 export type RootStackParamList = {
   Login: undefined;
   SignUp: undefined;
   Nav: undefined;
   FaceAttendance: { eventId: string };  
-  Face: undefined;
+  Register: undefined;
 };
 
 

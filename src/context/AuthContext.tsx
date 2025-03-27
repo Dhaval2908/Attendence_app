@@ -34,42 +34,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   // Modal state
   const { showModal, ModalComponent } = useFeedbackModal()
-//   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-useEffect(() => {
-  const loadUserData = async () => {
-      const savedUser = await AsyncStorage.getItem('user');
-      const savedToken = await AsyncStorage.getItem('token');
-
-      if (!savedUser || !savedToken) {
-          await AsyncStorage.multiRemove(['user', 'token']);
-          setUser(null);
-          setToken(null);
-          return;
-      }
-
-      try {
-          const decodedToken: DecodedToken = jwtDecode(savedToken);  
-          const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-
-          if (decodedToken.exp < currentTime) {
-              console.warn("❗ Token expired. Logging out...");
-              await AsyncStorage.multiRemove(['user', 'token']);
-              setUser(null);
-              setToken(null);
-              return;
-          }
-
-          setUser(JSON.parse(savedUser));
-          setToken(savedToken);
-      } catch (error) {
-          console.error("❌ Error decoding token:", error);
-          await AsyncStorage.multiRemove(['user', 'token']);
-          setUser(null);
-          setToken(null);
-      }
-  };
-  loadUserData();
-}, []);
+  useEffect(() => {
+    const loadUserData = async () => {
+        const savedUser = await AsyncStorage.getItem('user');
+        const savedToken = await AsyncStorage.getItem('token');
+  
+        if (!savedUser || !savedToken) {
+            await AsyncStorage.multiRemove(['user', 'token']);
+            setUser(null);
+            setToken(null);
+            return;
+        }
+  
+        try {
+            const decodedToken: DecodedToken = jwtDecode(savedToken);  
+            const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+  
+            if (decodedToken.exp < currentTime) {
+                console.warn(" Token expired. Logging out...");
+                await AsyncStorage.multiRemove(['user', 'token']);
+                setUser(null);
+                setToken(null);
+                return;
+            }
+  
+            setUser(JSON.parse(savedUser));
+            setToken(savedToken);
+        } catch (error) {
+            console.error(" Error decoding token:", error);
+            await AsyncStorage.multiRemove(['user', 'token']);
+            setUser(null);
+            setToken(null);
+        }
+    };
+  
+    loadUserData();
+  }, [token]); // Re-run effect if the token changes
+  
 
 const login = async (data: { token: string; User: User }) => {
   try {
@@ -77,7 +78,7 @@ const login = async (data: { token: string; User: User }) => {
       const currentTime = Math.floor(Date.now() / 1000);
 
       if (decodedToken.exp < currentTime) {
-          console.warn("❗ Login token expired. Rejecting login.");
+          console.warn(" Login token expired. Rejecting login.");
           showModal("Session Expired, Please log in again.","error");
           return;
       }
@@ -87,7 +88,7 @@ const login = async (data: { token: string; User: User }) => {
       await AsyncStorage.setItem('user', JSON.stringify(data.User));
       await AsyncStorage.setItem('token', data.token);
   } catch (error) {
-      console.error("❌ Error decoding token during login:", error);
+      console.error(" Error decoding token during login:", error);
       showModal( "Failed to login, please try again.","error");
   }
 };

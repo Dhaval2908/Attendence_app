@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Text, StyleSheet, ActivityIndicator, FlatList, RefreshControl } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import { Colors } from '../../theme/colors';
@@ -8,18 +8,46 @@ import { fontNormalize, fontSizeSmall, smartScale } from '../../theme/constants/
 import { useEvents } from '../../context/EventsContext';  
 import CategoryButtons from './components/CategoryButtons';
 import { useLocation } from '../../context/LocationContext';
+import axios from 'axios';
+import Config from 'react-native-config';
+import { AuthContext } from '../../context/AuthContext';
+import ModalComponent from '../../utils/ModalComponent';
 
 const HomeScreen = () => {
   const navigation = useNavigation(); 
   const { events, refreshEvents, loading: eventsLoading } = useEvents();
   const { fetchLocation } = useLocation();
+  const { token } = useContext(AuthContext)!;
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalType, setModalType] = useState<"success" | "error">("success");
 
   const [refreshing, setRefreshing] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<'Upcoming' | 'Ongoing' | 'Past'>('Upcoming');
-
-  const faceAttendance = (eventId: string) => {
-    navigation.navigate("FaceAttendance", { eventId });
+  const showModal = (message: string, type: "success" | "error") => {
+    setModalMessage(message);
+    setModalType(type);
+    setModalVisible(true);
+  };
+  const faceAttendance = async (eventId: string) => {
+    try {
+      const response = await axios.get(`${Config.BASE_URL}/api/check-face`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      if (response.data.registered) {
+        navigation.navigate("FaceAttendance", { eventId });
+      } else {
+        showModal("Please register face First", "error");
+        setTimeout(() => {
+          navigation.navigate("Register");
+        }, 2000); 
+      }
+    } catch (error) {
+      console.error("Face Check Error:", error);
+    }
+   
   };
 
   useEffect(() => {
@@ -59,6 +87,7 @@ const HomeScreen = () => {
   });
 
   return (
+    <>
     <FlatList
       style={styles.container}
       data={filteredEvents}
@@ -77,7 +106,7 @@ const HomeScreen = () => {
           <CategoryButtons
             selectedCategory={selectedCategory}
             onSelectCategory={setSelectedCategory}  
-          />
+            />
 
           {/*   Only one spinner during refresh */}
           {(refreshing || eventsLoading) && (
@@ -87,25 +116,34 @@ const HomeScreen = () => {
       }
       renderItem={({ item }) => (
         <Events
-          events={[item]}    
-          onRefresh={refreshEvents} 
-          onClockIn={faceAttendance} 
-          selectedCategory={selectedCategory}
-          loading={false} 
-          refreshing={false}
+        events={[item]}    
+        onRefresh={refreshEvents} 
+        onClockIn={faceAttendance} 
+        selectedCategory={selectedCategory}
+        loading={false} 
+        refreshing={false}
         />
       )}
       refreshControl={
         <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          colors={['#3b82f6']}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        colors={['#3b82f6']}
         />
       }
       ListEmptyComponent={
         eventsLoading ? null : <Text style={styles.noEvents}>No events found</Text>
       }
-    />
+      
+      />
+      <ModalComponent
+        visible={modalVisible}
+        message={modalMessage}
+        type={modalType}
+        onClose={() => setModalVisible(false)}
+      />
+      </>
+    
   );
 };
 
@@ -126,3 +164,19 @@ const styles = StyleSheet.create({
     color: Colors.primaryColor,
   },
 });
+function showModal(arg0: string, arg1: string) {
+  throw new Error('Function not implemented.');
+}
+
+function setModalMessage(message: string) {
+  throw new Error('Function not implemented.');
+}
+
+function setModalType(type: string) {
+  throw new Error('Function not implemented.');
+}
+
+function setModalVisible(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}
+
